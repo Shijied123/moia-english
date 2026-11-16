@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign Up · Practice English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">Practice English</a>
+    <a class="pill" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      Go Back
+    </a>
+  </header>
+
+  <main>
+    <h1>Sign Up</h1>
+    <p class="lead">Create your account. It only takes a minute.</p>
+
+    <form class="card" id="signup" novalidate>
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="name" required>
+        <div class="error">Please write your full name.</div>
+      </div>
+
+      <div class="field">
+        <label for="contact">Email or phone</label>
+        <input id="contact" name="contact" type="text" autocomplete="email" inputmode="email" required>
+        <div class="error">Please write your email or phone number.</div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <span class="hint">At least 8 letters or numbers.</span>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+        <div class="error">Your password needs at least 8 letters or numbers.</div>
+      </div>
+
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <span class="hint">Write the same password again.</span>
+        <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+        <div class="error">The two passwords are not the same.</div>
+      </div>
+
+      <div class="field">
+        <label for="languages">Language(s) you are fluent in</label>
+        <span class="hint">For example: Spanish, Chinese, Bengali</span>
+        <input id="languages" name="languages" type="text" required>
+        <div class="error">Please write at least one language.</div>
+      </div>
+
+      <div class="field">
+        <label for="age">Age</label>
+        <input id="age" name="age" class="short" type="number" inputmode="numeric" min="1" max="120" required>
+        <div class="error">Please write your age.</div>
+      </div>
+
+      <button class="submit" type="submit">Create Account</button>
+    </form>
+
+    <p class="switch">Already have an account? <a href="login.html">Log in</a></p>
+  </main>
+
+<script>
+  const form = document.getElementById('signup');
+  const checks = {
+    name: v => v.trim().length > 0,
+    contact: v => v.trim().length > 0,
+    password: v => v.length >= 8,
+    confirm: v => v.length > 0 && v === form.password.value,
+    languages: v => v.trim().length > 0,
+    age: v => Number(v) >= 1 && Number(v) <= 120,
+  };
+
+  function check(input) {
+    const ok = checks[input.name](input.value);
+    input.closest('.field').classList.toggle('invalid', !ok);
+    return ok;
+  }
+
+  // Once a field has shown an error, re-check it as the student types.
+  form.addEventListener('input', e => {
+    if (e.target.closest('.field').classList.contains('invalid')) check(e.target);
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const inputs = [...form.querySelectorAll('input')];
+    const bad = inputs.filter(i => !check(i));
+    if (bad.length) { bad[0].focus(); return; }
+    // TODO: send to the server once there is one.
+  });
+</script>
+</body>
+</html>

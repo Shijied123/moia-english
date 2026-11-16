@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log In · Practice English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">Practice English</a>
+    <a class="pill" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      Go Back
+    </a>
+  </header>
+
+  <main>
+    <h1>Log In</h1>
+    <p class="lead">Welcome back! Let's keep practicing.</p>
+
+    <form class="card" id="login" novalidate>
+      <div class="field">
+        <label for="contact">Email or phone</label>
+        <input id="contact" name="contact" type="text" autocomplete="username" inputmode="email" required>
+        <div class="error">Please write your email or phone number.</div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <div class="error">Please write your password.</div>
+      </div>
+
+      <button class="submit" type="submit">Log In</button>
+    </form>
+
+    <p class="switch">New here? <a href="signup.html">Create an account</a></p>
+  </main>
+
+<script>
+  const form = document.getElementById('login');
+
+  function check(input) {
+    const ok = input.value.trim().length > 0;
+    input.closest('.field').classList.toggle('invalid', !ok);
+    return ok;
+  }
+
+  form.addEventListener('input', e => {
+    if (e.target.closest('.field').classList.contains('invalid')) check(e.target);
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const bad = [...form.querySelectorAll('input')].filter(i => !check(i));
+    if (bad.length) { bad[0].focus(); return; }
+    // TODO: check the password with the server once there is one.
+  });
+</script>
+</body>
+</html>

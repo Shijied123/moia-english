@@ -1,0 +1,143 @@
+:root {
+  --bg: #f6f4ef;
+  --card: #ffffff;
+  --ink: #1d2433;
+  --muted: #5a6275;
+  --line: #e3dfd5;
+  --field-line: #c9c4b8;
+  --primary: #1f5fd1;
+  --primary-ink: #ffffff;
+  --primary-hover: #194fb0;
+  --error: #b42318;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Top bar */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+.brand { font-weight: 700; font-size: 20px; color: var(--ink); text-decoration: none; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.pill:hover { border-color: var(--field-line); }
+.pill svg { width: 18px; height: 18px; flex: none; }
+
+main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+h1 {
+  font-size: 40px;
+  line-height: 1.15;
+  margin: 0 0 8px;
+  text-align: center;
+}
+.lead {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 40px;
+}
+
+/* Big buttons on the welcome page */
+.actions { display: grid; gap: 14px; }
+.btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 2px solid var(--primary);
+}
+.btn strong { display: block; font-size: 24px; }
+.btn span { display: block; font-size: 16px; }
+.btn.primary { background: var(--primary); color: var(--primary-ink); }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.secondary { background: var(--card); color: var(--primary); }
+.btn.secondary span { color: var(--muted); }
+
+.about {
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.about h2 { font-size: 22px; margin: 0 0 8px; }
+.about p { margin: 0; color: var(--muted); }
+
+/* Forms */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 24px;
+}
+.field { margin-bottom: 20px; }
+.field label { display: block; font-weight: 700; margin-bottom: 6px; }
+.field .hint { display: block; font-size: 15px; color: var(--muted); margin: -2px 0 8px; }
+.field input {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--field-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(31, 95, 209, 0.18);
+}
+.field input.short { max-width: 140px; }
+.field .error { display: none; color: var(--error); font-size: 15px; margin-top: 6px; }
+.field.invalid input { border-color: var(--error); }
+.field.invalid .error { display: block; }
+.submit {
+  width: 100%;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-ink);
+  background: var(--primary);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.submit:hover { background: var(--primary-hover); }
+.switch { text-align: center; color: var(--muted); margin: 24px 0 0; }
+.switch a { color: var(--primary); font-weight: 700; }
+
+@media (max-width: 480px) {
+  header { padding: 16px; }
+  main { padding: 24px 16px 48px; }
+  h1 { font-size: 32px; }
+  .card { padding: 22px 16px; }
+}
