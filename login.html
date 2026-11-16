@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-title-key="login">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,33 +11,33 @@
 <body>
   <header>
     <a class="brand" href="index.html">Practice English</a>
-    <a class="pill" href="index.html">
+    <a class="pill back" href="index.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      Go Back
+      <span data-i18n="go_back">Go Back</span>
     </a>
   </header>
 
   <main>
-    <h1>Log In</h1>
-    <p class="lead">Welcome back! Let's keep practicing.</p>
+    <h1 data-i18n="login">Log In</h1>
+    <p class="lead" data-i18n="login_lead">Welcome back! Let's keep practicing.</p>
 
     <form class="card" id="login" novalidate>
       <div class="field">
-        <label for="contact">Email or phone</label>
+        <label for="contact" data-i18n="contact">Email or phone</label>
         <input id="contact" name="contact" type="text" autocomplete="username" inputmode="email" required>
-        <div class="error">Please write your email or phone number.</div>
+        <div class="error" data-i18n="err_contact">Please write your email or phone number.</div>
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password" data-i18n="password">Password</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required>
-        <div class="error">Please write your password.</div>
+        <div class="error" data-i18n="err_login_pw">Please write your password.</div>
       </div>
 
-      <button class="submit" type="submit">Log In</button>
+      <button class="submit" type="submit" data-i18n="login">Log In</button>
     </form>
 
-    <p class="switch">New here? <a href="signup.html">Create an account</a></p>
+    <p class="switch"><span data-i18n="new_here">New here?</span> <a href="signup.html" data-i18n="create_link">Create an account</a></p>
   </main>
 
 <script>
@@ -60,5 +60,6 @@
     // TODO: check the password with the server once there is one.
   });
 </script>
+<script src="i18n.js"></script>
 </body>
 </html>

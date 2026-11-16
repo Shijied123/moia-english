@@ -1,0 +1,497 @@
+// Language switcher.
+// Any element with data-i18n="key" gets its text swapped for the chosen language.
+// English comes from the HTML itself, so the pages still read fine if this file fails.
+// The choice is saved in the browser and used on every page.
+
+const LANGUAGES = [
+  { code: 'en', name: 'English', english: 'English' },
+  { code: 'es', name: 'Español', english: 'Spanish' },
+  { code: 'zh-Hans', name: '简体中文', english: 'Chinese (Simplified)' },
+  { code: 'zh-Hant', name: '繁體中文', english: 'Chinese (Traditional)' },
+  { code: 'ru', name: 'Русский', english: 'Russian' },
+  { code: 'bn', name: 'বাংলা', english: 'Bengali' },
+  { code: 'ht', name: 'Kreyòl Ayisyen', english: 'Haitian Creole' },
+  { code: 'ko', name: '한국어', english: 'Korean' },
+  { code: 'ar', name: 'العربية', english: 'Arabic', rtl: true },
+  { code: 'ur', name: 'اردو', english: 'Urdu', rtl: true },
+  { code: 'fr', name: 'Français', english: 'French' },
+  { code: 'pl', name: 'Polski', english: 'Polish' },
+];
+
+const STRINGS = {
+  es: {
+    choose_language: 'Elegir idioma',
+    go_back: 'Volver',
+    welcome: '¡Te damos la bienvenida!',
+    welcome_lead: 'Practica inglés un poco cada día.',
+    signup: 'Registrarse',
+    signup_sub: 'Crear una cuenta',
+    login: 'Iniciar sesión',
+    login_sub: 'Ya tengo una cuenta',
+    about: 'Quiénes somos',
+    about_body: 'Ayudamos a los estudiantes de las clases de inglés de MOIA a practicar cómo hablar, leer y escribir en inglés fuera de clase. Es gratis y puedes avanzar a tu propio ritmo.',
+    signup_lead: 'Crea tu cuenta. Solo toma un minuto.',
+    full_name: 'Nombre completo',
+    err_name: 'Escribe tu nombre completo.',
+    contact: 'Correo electrónico o teléfono',
+    err_contact: 'Escribe tu correo electrónico o número de teléfono.',
+    password: 'Contraseña',
+    pw_hint: 'Al menos 8 letras o números.',
+    err_pw: 'Tu contraseña necesita al menos 8 letras o números.',
+    confirm: 'Confirmar contraseña',
+    confirm_hint: 'Escribe la misma contraseña otra vez.',
+    err_confirm: 'Las dos contraseñas no son iguales.',
+    languages: 'Idioma(s) que hablas con fluidez',
+    languages_hint: 'Por ejemplo: español, chino, bengalí',
+    err_languages: 'Escribe al menos un idioma.',
+    age: 'Edad',
+    err_age: 'Escribe tu edad.',
+    create_account: 'Crear cuenta',
+    have_account: '¿Ya tienes una cuenta?',
+    login_link: 'Inicia sesión',
+    login_lead: '¡Hola de nuevo! Sigamos practicando.',
+    err_login_pw: 'Escribe tu contraseña.',
+    new_here: '¿Primera vez aquí?',
+    create_link: 'Crea una cuenta',
+  },
+  'zh-Hans': {
+    choose_language: '选择语言',
+    go_back: '返回',
+    welcome: '欢迎！',
+    welcome_lead: '每天练习一点英语。',
+    signup: '注册',
+    signup_sub: '创建账户',
+    login: '登录',
+    login_sub: '我已经有账户',
+    about: '关于我们',
+    about_body: '我们帮助 MOIA 英语课的学生在课外练习英语口语、阅读和写作。完全免费，你可以按自己的节奏学习。',
+    signup_lead: '创建你的账户，只需要一分钟。',
+    full_name: '全名',
+    err_name: '请填写你的全名。',
+    contact: '电子邮箱或电话',
+    err_contact: '请填写你的电子邮箱或电话号码。',
+    password: '密码',
+    pw_hint: '至少 8 个字母或数字。',
+    err_pw: '密码至少需要 8 个字母或数字。',
+    confirm: '确认密码',
+    confirm_hint: '再输入一次相同的密码。',
+    err_confirm: '两次输入的密码不一样。',
+    languages: '你能流利使用的语言',
+    languages_hint: '例如：西班牙语、中文、孟加拉语',
+    err_languages: '请至少填写一种语言。',
+    age: '年龄',
+    err_age: '请填写你的年龄。',
+    create_account: '创建账户',
+    have_account: '已经有账户了？',
+    login_link: '登录',
+    login_lead: '欢迎回来！我们继续练习吧。',
+    err_login_pw: '请填写你的密码。',
+    new_here: '第一次来？',
+    create_link: '创建账户',
+  },
+  'zh-Hant': {
+    choose_language: '選擇語言',
+    go_back: '返回',
+    welcome: '歡迎！',
+    welcome_lead: '每天練習一點英文。',
+    signup: '註冊',
+    signup_sub: '建立帳戶',
+    login: '登入',
+    login_sub: '我已經有帳戶',
+    about: '關於我們',
+    about_body: '我們幫助 MOIA 英文課的學生在課外練習英文口說、閱讀和寫作。完全免費，你可以按照自己的步調學習。',
+    signup_lead: '建立你的帳戶，只需要一分鐘。',
+    full_name: '全名',
+    err_name: '請填寫你的全名。',
+    contact: '電子郵件或電話',
+    err_contact: '請填寫你的電子郵件或電話號碼。',
+    password: '密碼',
+    pw_hint: '至少 8 個字母或數字。',
+    err_pw: '密碼至少需要 8 個字母或數字。',
+    confirm: '確認密碼',
+    confirm_hint: '再輸入一次相同的密碼。',
+    err_confirm: '兩次輸入的密碼不一樣。',
+    languages: '你能流利使用的語言',
+    languages_hint: '例如：西班牙文、中文、孟加拉文',
+    err_languages: '請至少填寫一種語言。',
+    age: '年齡',
+    err_age: '請填寫你的年齡。',
+    create_account: '建立帳戶',
+    have_account: '已經有帳戶了？',
+    login_link: '登入',
+    login_lead: '歡迎回來！我們繼續練習吧。',
+    err_login_pw: '請填寫你的密碼。',
+    new_here: '第一次來？',
+    create_link: '建立帳戶',
+  },
+  ru: {
+    choose_language: 'Выбрать язык',
+    go_back: 'Назад',
+    welcome: 'Добро пожаловать!',
+    welcome_lead: 'Занимайтесь английским понемногу каждый день.',
+    signup: 'Регистрация',
+    signup_sub: 'Создать аккаунт',
+    login: 'Войти',
+    login_sub: 'У меня уже есть аккаунт',
+    about: 'О нас',
+    about_body: 'Мы помогаем студентам курсов английского языка MOIA практиковаться в разговоре, чтении и письме на английском вне занятий. Это бесплатно, и вы можете заниматься в своём темпе.',
+    signup_lead: 'Создайте аккаунт. Это займёт всего минуту.',
+    full_name: 'Полное имя',
+    err_name: 'Пожалуйста, напишите ваше полное имя.',
+    contact: 'Эл. почта или телефон',
+    err_contact: 'Пожалуйста, напишите вашу эл. почту или номер телефона.',
+    password: 'Пароль',
+    pw_hint: 'Не менее 8 букв или цифр.',
+    err_pw: 'Пароль должен содержать не менее 8 букв или цифр.',
+    confirm: 'Повторите пароль',
+    confirm_hint: 'Напишите тот же пароль ещё раз.',
+    err_confirm: 'Пароли не совпадают.',
+    languages: 'Языки, которыми вы свободно владеете',
+    languages_hint: 'Например: испанский, китайский, бенгальский',
+    err_languages: 'Пожалуйста, напишите хотя бы один язык.',
+    age: 'Возраст',
+    err_age: 'Пожалуйста, напишите ваш возраст.',
+    create_account: 'Создать аккаунт',
+    have_account: 'Уже есть аккаунт?',
+    login_link: 'Войти',
+    login_lead: 'С возвращением! Продолжим заниматься.',
+    err_login_pw: 'Пожалуйста, напишите ваш пароль.',
+    new_here: 'Впервые здесь?',
+    create_link: 'Создать аккаунт',
+  },
+  bn: {
+    choose_language: 'ভাষা বেছে নিন',
+    go_back: 'ফিরে যান',
+    welcome: 'স্বাগতম!',
+    welcome_lead: 'প্রতিদিন একটু একটু করে ইংরেজি অনুশীলন করুন।',
+    signup: 'সাইন আপ',
+    signup_sub: 'একটি অ্যাকাউন্ট তৈরি করুন',
+    login: 'লগ ইন',
+    login_sub: 'আমার আগে থেকেই অ্যাকাউন্ট আছে',
+    about: 'আমাদের সম্পর্কে',
+    about_body: 'আমরা MOIA ইংরেজি ক্লাসের শিক্ষার্থীদের ক্লাসের বাইরে ইংরেজিতে কথা বলা, পড়া এবং লেখা অনুশীলন করতে সাহায্য করি। এটি বিনামূল্যে, এবং আপনি নিজের গতিতে শিখতে পারেন।',
+    signup_lead: 'আপনার অ্যাকাউন্ট তৈরি করুন। মাত্র এক মিনিট লাগবে।',
+    full_name: 'পুরো নাম',
+    err_name: 'দয়া করে আপনার পুরো নাম লিখুন।',
+    contact: 'ইমেইল বা ফোন',
+    err_contact: 'দয়া করে আপনার ইমেইল বা ফোন নম্বর লিখুন।',
+    password: 'পাসওয়ার্ড',
+    pw_hint: 'কমপক্ষে ৮টি অক্ষর বা সংখ্যা।',
+    err_pw: 'আপনার পাসওয়ার্ডে কমপক্ষে ৮টি অক্ষর বা সংখ্যা থাকতে হবে।',
+    confirm: 'পাসওয়ার্ড নিশ্চিত করুন',
+    confirm_hint: 'একই পাসওয়ার্ড আবার লিখুন।',
+    err_confirm: 'দুটি পাসওয়ার্ড এক নয়।',
+    languages: 'যে ভাষা(গুলো)তে আপনি সাবলীল',
+    languages_hint: 'যেমন: স্প্যানিশ, চাইনিজ, বাংলা',
+    err_languages: 'দয়া করে অন্তত একটি ভাষা লিখুন।',
+    age: 'বয়স',
+    err_age: 'দয়া করে আপনার বয়স লিখুন।',
+    create_account: 'অ্যাকাউন্ট তৈরি করুন',
+    have_account: 'আগে থেকেই অ্যাকাউন্ট আছে?',
+    login_link: 'লগ ইন করুন',
+    login_lead: 'আবার স্বাগতম! চলুন অনুশীলন চালিয়ে যাই।',
+    err_login_pw: 'দয়া করে আপনার পাসওয়ার্ড লিখুন।',
+    new_here: 'এখানে নতুন?',
+    create_link: 'একটি অ্যাকাউন্ট তৈরি করুন',
+  },
+  ht: {
+    choose_language: 'Chwazi lang',
+    go_back: 'Retounen',
+    welcome: 'Byenvini!',
+    welcome_lead: 'Pratike angle yon ti kras chak jou.',
+    signup: 'Enskri',
+    signup_sub: 'Kreye yon kont',
+    login: 'Konekte',
+    login_sub: 'Mwen gen yon kont deja',
+    about: 'Konsènan nou',
+    about_body: 'Nou ede elèv ki nan klas angle MOIA yo pratike pale, li ak ekri angle andeyò klas la. Li gratis, epi ou ka avanse nan pwòp rit ou.',
+    signup_lead: 'Kreye kont ou. Sa pran sèlman yon minit.',
+    full_name: 'Non konplè',
+    err_name: 'Tanpri ekri non konplè ou.',
+    contact: 'Imèl oswa telefòn',
+    err_contact: 'Tanpri ekri imèl ou oswa nimewo telefòn ou.',
+    password: 'Modpas',
+    pw_hint: 'Omwen 8 lèt oswa chif.',
+    err_pw: 'Modpas ou bezwen omwen 8 lèt oswa chif.',
+    confirm: 'Konfime modpas',
+    confirm_hint: 'Ekri menm modpas la ankò.',
+    err_confirm: 'De modpas yo pa menm.',
+    languages: 'Lang ou pale byen',
+    languages_hint: 'Pa egzanp: panyòl, chinwa, bengali',
+    err_languages: 'Tanpri ekri omwen yon lang.',
+    age: 'Laj',
+    err_age: 'Tanpri ekri laj ou.',
+    create_account: 'Kreye kont',
+    have_account: 'Ou gen yon kont deja?',
+    login_link: 'Konekte',
+    login_lead: 'Byenvini ankò! Ann kontinye pratike.',
+    err_login_pw: 'Tanpri ekri modpas ou.',
+    new_here: 'Ou nouvo isit la?',
+    create_link: 'Kreye yon kont',
+  },
+  ko: {
+    choose_language: '언어 선택',
+    go_back: '뒤로 가기',
+    welcome: '환영합니다!',
+    welcome_lead: '매일 조금씩 영어를 연습하세요.',
+    signup: '회원가입',
+    signup_sub: '계정 만들기',
+    login: '로그인',
+    login_sub: '이미 계정이 있어요',
+    about: '소개',
+    about_body: '저희는 MOIA 영어 수업을 듣는 학생들이 수업 밖에서도 영어 말하기, 읽기, 쓰기를 연습할 수 있도록 돕습니다. 무료이며, 자신의 속도에 맞춰 배울 수 있습니다.',
+    signup_lead: '계정을 만드세요. 1분이면 됩니다.',
+    full_name: '이름(성명)',
+    err_name: '이름을 모두 입력해 주세요.',
+    contact: '이메일 또는 전화번호',
+    err_contact: '이메일 또는 전화번호를 입력해 주세요.',
+    password: '비밀번호',
+    pw_hint: '문자나 숫자 8개 이상.',
+    err_pw: '비밀번호는 문자나 숫자 8개 이상이어야 합니다.',
+    confirm: '비밀번호 확인',
+    confirm_hint: '같은 비밀번호를 한 번 더 입력하세요.',
+    err_confirm: '두 비밀번호가 같지 않습니다.',
+    languages: '유창하게 하는 언어',
+    languages_hint: '예: 스페인어, 중국어, 벵골어',
+    err_languages: '언어를 하나 이상 입력해 주세요.',
+    age: '나이',
+    err_age: '나이를 입력해 주세요.',
+    create_account: '계정 만들기',
+    have_account: '이미 계정이 있나요?',
+    login_link: '로그인',
+    login_lead: '다시 오신 것을 환영합니다! 계속 연습해요.',
+    err_login_pw: '비밀번호를 입력해 주세요.',
+    new_here: '처음 오셨나요?',
+    create_link: '계정 만들기',
+  },
+  ar: {
+    choose_language: 'اختر اللغة',
+    go_back: 'رجوع',
+    welcome: 'أهلاً بك!',
+    welcome_lead: 'تدرّب على الإنجليزية قليلاً كل يوم.',
+    signup: 'التسجيل',
+    signup_sub: 'إنشاء حساب جديد',
+    login: 'تسجيل الدخول',
+    login_sub: 'لديّ حساب بالفعل',
+    about: 'من نحن',
+    about_body: 'نساعد طلاب دروس اللغة الإنجليزية في MOIA على التدرّب على التحدث والقراءة والكتابة بالإنجليزية خارج الصف. الموقع مجاني، ويمكنك التعلّم بالسرعة التي تناسبك.',
+    signup_lead: 'أنشئ حسابك. لن يستغرق الأمر سوى دقيقة.',
+    full_name: 'الاسم الكامل',
+    err_name: 'يُرجى كتابة اسمك الكامل.',
+    contact: 'البريد الإلكتروني أو الهاتف',
+    err_contact: 'يُرجى كتابة بريدك الإلكتروني أو رقم هاتفك.',
+    password: 'كلمة المرور',
+    pw_hint: '8 أحرف أو أرقام على الأقل.',
+    err_pw: 'يجب أن تحتوي كلمة المرور على 8 أحرف أو أرقام على الأقل.',
+    confirm: 'تأكيد كلمة المرور',
+    confirm_hint: 'اكتب كلمة المرور نفسها مرة أخرى.',
+    err_confirm: 'كلمتا المرور غير متطابقتين.',
+    languages: 'اللغة (اللغات) التي تتحدثها بطلاقة',
+    languages_hint: 'مثال: الإسبانية، الصينية، البنغالية',
+    err_languages: 'يُرجى كتابة لغة واحدة على الأقل.',
+    age: 'العمر',
+    err_age: 'يُرجى كتابة عمرك.',
+    create_account: 'إنشاء الحساب',
+    have_account: 'لديك حساب بالفعل؟',
+    login_link: 'سجّل الدخول',
+    login_lead: 'مرحباً بعودتك! لنواصل التدرّب.',
+    err_login_pw: 'يُرجى كتابة كلمة المرور.',
+    new_here: 'جديد هنا؟',
+    create_link: 'أنشئ حساباً',
+  },
+  ur: {
+    choose_language: 'زبان منتخب کریں',
+    go_back: 'واپس جائیں',
+    welcome: 'خوش آمدید!',
+    welcome_lead: 'ہر روز تھوڑی سی انگریزی کی مشق کریں۔',
+    signup: 'سائن اپ',
+    signup_sub: 'اکاؤنٹ بنائیں',
+    login: 'لاگ ان',
+    login_sub: 'میرا اکاؤنٹ پہلے سے ہے',
+    about: 'ہمارے بارے میں',
+    about_body: 'ہم MOIA کی انگریزی کلاسوں کے طلبہ کو کلاس کے باہر انگریزی بولنے، پڑھنے اور لکھنے کی مشق میں مدد دیتے ہیں۔ یہ مفت ہے، اور آپ اپنی رفتار سے سیکھ سکتے ہیں۔',
+    signup_lead: 'اپنا اکاؤنٹ بنائیں۔ اس میں صرف ایک منٹ لگتا ہے۔',
+    full_name: 'پورا نام',
+    err_name: 'براہ کرم اپنا پورا نام لکھیں۔',
+    contact: 'ای میل یا فون',
+    err_contact: 'براہ کرم اپنا ای میل یا فون نمبر لکھیں۔',
+    password: 'پاس ورڈ',
+    pw_hint: 'کم از کم 8 حروف یا نمبر۔',
+    err_pw: 'آپ کے پاس ورڈ میں کم از کم 8 حروف یا نمبر ہونے چاہئیں۔',
+    confirm: 'پاس ورڈ کی تصدیق کریں',
+    confirm_hint: 'وہی پاس ورڈ دوبارہ لکھیں۔',
+    err_confirm: 'دونوں پاس ورڈ ایک جیسے نہیں ہیں۔',
+    languages: 'وہ زبان (زبانیں) جو آپ روانی سے بولتے ہیں',
+    languages_hint: 'مثلاً: ہسپانوی، چینی، بنگالی',
+    err_languages: 'براہ کرم کم از کم ایک زبان لکھیں۔',
+    age: 'عمر',
+    err_age: 'براہ کرم اپنی عمر لکھیں۔',
+    create_account: 'اکاؤنٹ بنائیں',
+    have_account: 'کیا آپ کا اکاؤنٹ پہلے سے ہے؟',
+    login_link: 'لاگ ان کریں',
+    login_lead: 'دوبارہ خوش آمدید! آئیے مشق جاری رکھیں۔',
+    err_login_pw: 'براہ کرم اپنا پاس ورڈ لکھیں۔',
+    new_here: 'یہاں نئے ہیں؟',
+    create_link: 'اکاؤنٹ بنائیں',
+  },
+  fr: {
+    choose_language: 'Choisir la langue',
+    go_back: 'Retour',
+    welcome: 'Bienvenue !',
+    welcome_lead: "Pratiquez l'anglais un peu chaque jour.",
+    signup: "S'inscrire",
+    signup_sub: 'Créer un compte',
+    login: 'Se connecter',
+    login_sub: "J'ai déjà un compte",
+    about: 'Qui sommes-nous',
+    about_body: "Nous aidons les élèves des cours d'anglais de MOIA à pratiquer l'oral, la lecture et l'écriture en anglais en dehors des cours. C'est gratuit, et vous pouvez avancer à votre rythme.",
+    signup_lead: "Créez votre compte. Cela ne prend qu'une minute.",
+    full_name: 'Nom complet',
+    err_name: 'Veuillez écrire votre nom complet.',
+    contact: 'E-mail ou téléphone',
+    err_contact: 'Veuillez écrire votre e-mail ou votre numéro de téléphone.',
+    password: 'Mot de passe',
+    pw_hint: 'Au moins 8 lettres ou chiffres.',
+    err_pw: 'Votre mot de passe doit contenir au moins 8 lettres ou chiffres.',
+    confirm: 'Confirmer le mot de passe',
+    confirm_hint: 'Écrivez le même mot de passe encore une fois.',
+    err_confirm: 'Les deux mots de passe ne sont pas identiques.',
+    languages: 'Langue(s) que vous parlez couramment',
+    languages_hint: 'Par exemple : espagnol, chinois, bengali',
+    err_languages: 'Veuillez écrire au moins une langue.',
+    age: 'Âge',
+    err_age: 'Veuillez écrire votre âge.',
+    create_account: 'Créer le compte',
+    have_account: 'Vous avez déjà un compte ?',
+    login_link: 'Connectez-vous',
+    login_lead: 'Bon retour ! Continuons à pratiquer.',
+    err_login_pw: 'Veuillez écrire votre mot de passe.',
+    new_here: 'Première visite ?',
+    create_link: 'Créez un compte',
+  },
+  pl: {
+    choose_language: 'Wybierz język',
+    go_back: 'Wróć',
+    welcome: 'Witamy!',
+    welcome_lead: 'Ćwicz angielski codziennie po trochu.',
+    signup: 'Zarejestruj się',
+    signup_sub: 'Utwórz konto',
+    login: 'Zaloguj się',
+    login_sub: 'Mam już konto',
+    about: 'O nas',
+    about_body: 'Pomagamy uczniom zajęć z angielskiego MOIA ćwiczyć mówienie, czytanie i pisanie po angielsku poza zajęciami. To nic nie kosztuje, a uczysz się we własnym tempie.',
+    signup_lead: 'Utwórz konto. To zajmie tylko minutę.',
+    full_name: 'Imię i nazwisko',
+    err_name: 'Wpisz swoje imię i nazwisko.',
+    contact: 'E-mail lub telefon',
+    err_contact: 'Wpisz swój e-mail lub numer telefonu.',
+    password: 'Hasło',
+    pw_hint: 'Co najmniej 8 liter lub cyfr.',
+    err_pw: 'Hasło musi mieć co najmniej 8 liter lub cyfr.',
+    confirm: 'Potwierdź hasło',
+    confirm_hint: 'Wpisz to samo hasło jeszcze raz.',
+    err_confirm: 'Hasła nie są takie same.',
+    languages: 'Język(i), którymi mówisz płynnie',
+    languages_hint: 'Na przykład: hiszpański, chiński, bengalski',
+    err_languages: 'Wpisz co najmniej jeden język.',
+    age: 'Wiek',
+    err_age: 'Wpisz swój wiek.',
+    create_account: 'Utwórz konto',
+    have_account: 'Masz już konto?',
+    login_link: 'Zaloguj się',
+    login_lead: 'Witaj ponownie! Ćwiczmy dalej.',
+    err_login_pw: 'Wpisz swoje hasło.',
+    new_here: 'Pierwszy raz tutaj?',
+    create_link: 'Utwórz konto',
+  },
+};
+
+(function () {
+  const STORAGE_KEY = 'practice-english-language';
+  const SITE_NAME = 'Practice English';
+  const root = document.documentElement;
+  const titleKey = root.dataset.titleKey;
+
+  // Remember the English text that is already in the page.
+  const english = new Map();
+  document.querySelectorAll('[data-i18n]').forEach(el => english.set(el, el.textContent));
+
+  function saved() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  }
+  function save(code) {
+    try { localStorage.setItem(STORAGE_KEY, code); } catch { /* private window: choice lasts this page only */ }
+  }
+
+  function apply(code) {
+    const lang = LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
+    const dict = STRINGS[lang.code] || {};
+    english.forEach((text, el) => { el.textContent = dict[el.dataset.i18n] || text; });
+    root.lang = lang.code;
+    root.dir = lang.rtl ? 'rtl' : 'ltr';
+    if (titleKey) {
+      const englishTitle = document.querySelector(`[data-i18n="${titleKey}"]`);
+      const label = dict[titleKey] || (englishTitle && english.get(englishTitle));
+      document.title = label ? `${label} · ${SITE_NAME}` : SITE_NAME;
+    }
+    document.querySelectorAll('.lang-menu button').forEach(b => {
+      b.setAttribute('aria-current', b.dataset.code === lang.code ? 'true' : 'false');
+    });
+  }
+
+  // The menu only exists on pages that have the Choose Language button.
+  const button = document.getElementById('lang-button');
+  if (button) {
+    const menu = document.createElement('div');
+    menu.className = 'lang-menu';
+    menu.id = 'lang-menu';
+    menu.hidden = true;
+    LANGUAGES.forEach(l => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.dataset.code = l.code;
+      item.lang = l.code;
+      item.innerHTML = '<span class="native"></span><span class="english"></span>';
+      item.querySelector('.native').textContent = l.name;
+      if (l.english !== l.name) item.querySelector('.english').textContent = l.english;
+      item.addEventListener('click', () => {
+        save(l.code);
+        apply(l.code);
+        close();
+        button.focus();
+      });
+      menu.appendChild(item);
+    });
+    button.after(menu);
+    button.setAttribute('aria-controls', 'lang-menu');
+    button.setAttribute('aria-expanded', 'false');
+
+    function open() {
+      menu.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+      (menu.querySelector('[aria-current="true"]') || menu.firstChild).focus();
+    }
+    function close() {
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    }
+
+    button.addEventListener('click', () => (menu.hidden ? open() : close()));
+    document.addEventListener('click', e => {
+      if (!menu.hidden && !menu.contains(e.target) && !button.contains(e.target)) close();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !menu.hidden) { close(); button.focus(); }
+    });
+    menu.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      e.preventDefault();
+      const items = [...menu.children];
+      const i = items.indexOf(document.activeElement);
+      const next = e.key === 'ArrowDown' ? (i + 1) % items.length : (i - 1 + items.length) % items.length;
+      items[next].focus();
+    });
+  }
+
+  apply(saved() || 'en');
+})();

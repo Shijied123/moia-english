@@ -11,31 +11,34 @@
 <body>
   <header>
     <a class="brand" href="index.html">Practice English</a>
-    <button class="pill" type="button" aria-label="Choose language">
+    <div class="lang-wrap">
+    <button class="pill" id="lang-button" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>
-      Choose Language
+      <span data-i18n="choose_language">Choose Language</span>
     </button>
+    </div>
   </header>
 
   <main>
-    <h1>Welcome!</h1>
-    <p class="lead">Practice English a little every day.</p>
+    <h1 data-i18n="welcome">Welcome!</h1>
+    <p class="lead" data-i18n="welcome_lead">Practice English a little every day.</p>
 
     <div class="actions">
       <a class="btn primary" href="signup.html">
-        <strong>Sign Up</strong>
-        <span>Create an account</span>
+        <strong data-i18n="signup">Sign Up</strong>
+        <span data-i18n="signup_sub">Create an account</span>
       </a>
       <a class="btn secondary" href="login.html">
-        <strong>Log In</strong>
-        <span>I already have an account</span>
+        <strong data-i18n="login">Log In</strong>
+        <span data-i18n="login_sub">I already have an account</span>
       </a>
     </div>
 
     <section class="about">
-      <h2>About Us</h2>
-      <p>We help students in MOIA English classes practice speaking, reading and writing English outside of class. It is free, and you can go at your own speed.</p>
+      <h2 data-i18n="about">About Us</h2>
+      <p data-i18n="about_body">We help students in MOIA English classes practice speaking, reading and writing English outside of class. It is free, and you can go at your own speed.</p>
     </section>
   </main>
+<script src="i18n.js"></script>
 </body>
 </html>

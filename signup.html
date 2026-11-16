@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-title-key="signup">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,60 +11,60 @@
 <body>
   <header>
     <a class="brand" href="index.html">Practice English</a>
-    <a class="pill" href="index.html">
+    <a class="pill back" href="index.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      Go Back
+      <span data-i18n="go_back">Go Back</span>
     </a>
   </header>
 
   <main>
-    <h1>Sign Up</h1>
-    <p class="lead">Create your account. It only takes a minute.</p>
+    <h1 data-i18n="signup">Sign Up</h1>
+    <p class="lead" data-i18n="signup_lead">Create your account. It only takes a minute.</p>
 
     <form class="card" id="signup" novalidate>
       <div class="field">
-        <label for="name">Full name</label>
+        <label for="name" data-i18n="full_name">Full name</label>
         <input id="name" name="name" type="text" autocomplete="name" required>
-        <div class="error">Please write your full name.</div>
+        <div class="error" data-i18n="err_name">Please write your full name.</div>
       </div>
 
       <div class="field">
-        <label for="contact">Email or phone</label>
+        <label for="contact" data-i18n="contact">Email or phone</label>
         <input id="contact" name="contact" type="text" autocomplete="email" inputmode="email" required>
-        <div class="error">Please write your email or phone number.</div>
+        <div class="error" data-i18n="err_contact">Please write your email or phone number.</div>
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
-        <span class="hint">At least 8 letters or numbers.</span>
+        <label for="password" data-i18n="password">Password</label>
+        <span class="hint" data-i18n="pw_hint">At least 8 letters or numbers.</span>
         <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
-        <div class="error">Your password needs at least 8 letters or numbers.</div>
+        <div class="error" data-i18n="err_pw">Your password needs at least 8 letters or numbers.</div>
       </div>
 
       <div class="field">
-        <label for="confirm">Confirm password</label>
-        <span class="hint">Write the same password again.</span>
+        <label for="confirm" data-i18n="confirm">Confirm password</label>
+        <span class="hint" data-i18n="confirm_hint">Write the same password again.</span>
         <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
-        <div class="error">The two passwords are not the same.</div>
+        <div class="error" data-i18n="err_confirm">The two passwords are not the same.</div>
       </div>
 
       <div class="field">
-        <label for="languages">Language(s) you are fluent in</label>
-        <span class="hint">For example: Spanish, Chinese, Bengali</span>
+        <label for="languages" data-i18n="languages">Language(s) you are fluent in</label>
+        <span class="hint" data-i18n="languages_hint">For example: Spanish, Chinese, Bengali</span>
         <input id="languages" name="languages" type="text" required>
-        <div class="error">Please write at least one language.</div>
+        <div class="error" data-i18n="err_languages">Please write at least one language.</div>
       </div>
 
       <div class="field">
-        <label for="age">Age</label>
+        <label for="age" data-i18n="age">Age</label>
         <input id="age" name="age" class="short" type="number" inputmode="numeric" min="1" max="120" required>
-        <div class="error">Please write your age.</div>
+        <div class="error" data-i18n="err_age">Please write your age.</div>
       </div>
 
-      <button class="submit" type="submit">Create Account</button>
+      <button class="submit" type="submit" data-i18n="create_account">Create Account</button>
     </form>
 
-    <p class="switch">Already have an account? <a href="login.html">Log in</a></p>
+    <p class="switch"><span data-i18n="have_account">Already have an account?</span> <a href="login.html" data-i18n="login_link">Log in</a></p>
   </main>
 
 <script>
@@ -97,5 +97,6 @@
     // TODO: send to the server once there is one.
   });
 </script>
+<script src="i18n.js"></script>
 </body>
 </html>
