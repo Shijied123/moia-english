@@ -294,6 +294,7 @@ textarea.side-input { resize: vertical; min-height: 64px; }
   width: 100%;
   margin: 0 auto;
 }
+.main-top { display: flex; justify-content: flex-end; margin: -12px 0 4px; }
 .practice-main h1 { margin-bottom: 4px; }
 .practice-main .lead { margin-bottom: 28px; }
 .topics {

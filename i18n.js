@@ -418,6 +418,7 @@ const PRACTICE_KEYS = [
   'topic_interview', 'topic_finances', 'topic_help', 'topic_restaurant', 'topic_doctor',
   'topic_vote', 'topic_911', 'topic_school', 'topic_weather',
   'topic_parent_teacher', 'topic_mta', 'topic_party', 'topic_friends', 'topic_appointment',
+  'log_out',
 ];
 
 const PRACTICE_STRINGS = {
@@ -428,6 +429,7 @@ const PRACTICE_STRINGS = {
     'Entrevista', 'Hablar de finanzas', 'Pedir ayuda', 'Restaurante (pedir y pagar)', 'Visitar al médico',
     'Registrarse para votar', 'Llamar al 911', 'Hablar de la escuela', 'El clima y las tormentas',
     'Reunión de padres y maestros', 'Moverse en el MTA y pedir direcciones', 'Planear una fiesta', 'Hacer planes con un amigo', 'Hacer una cita',
+    'Cerrar sesión',
   ],
   'zh-Hans': [
     '练习', '选择一个对话主题：', '自由练习', 'MOIA 班级代码', '添加', '找不到这个代码，请问你的老师。',
@@ -436,6 +438,7 @@ const PRACTICE_STRINGS = {
     '面试', '谈论财务', '请求帮助', '餐厅（点餐和付款）', '看医生',
     '选民登记', '拨打 911', '谈论学校', '天气和暴风雨',
     '家长会', '乘坐 MTA 和问路', '筹划派对', '和朋友约时间', '预约',
+    '退出登录',
   ],
   'zh-Hant': [
     '練習', '選擇一個對話主題：', '自由練習', 'MOIA 班級代碼', '新增', '找不到這個代碼，請問你的老師。',
@@ -444,6 +447,7 @@ const PRACTICE_STRINGS = {
     '面試', '談論財務', '請求幫助', '餐廳（點餐和付款）', '看醫生',
     '選民登記', '撥打 911', '談論學校', '天氣和暴風雨',
     '家長會', '搭乘 MTA 和問路', '籌劃派對', '和朋友約時間', '預約',
+    '登出',
   ],
   ru: [
     'Практика', 'Выберите тему для разговора:', 'Свободная практика', 'Код класса MOIA', 'Добавить', 'Мы не нашли этот код. Спросите у преподавателя.',
@@ -452,6 +456,7 @@ const PRACTICE_STRINGS = {
     'Собеседование', 'Разговор о финансах', 'Просьба о помощи', 'Ресторан (заказ и оплата)', 'Визит к врачу',
     'Регистрация для голосования', 'Звонок в 911', 'Разговор о школе', 'Погода и шторм',
     'Встреча родителей с учителем', 'Транспорт MTA и как пройти', 'Планируем вечеринку', 'Договориться с другом о встрече', 'Запись на приём',
+    'Выйти',
   ],
   bn: [
     'অনুশীলন', 'কথা বলার জন্য একটি বিষয় বেছে নিন:', 'সাধারণ অনুশীলন', 'MOIA ক্লাস কোড', 'যোগ করুন', 'এই কোডটি খুঁজে পাওয়া যায়নি। আপনার শিক্ষককে জিজ্ঞেস করুন।',
@@ -460,6 +465,7 @@ const PRACTICE_STRINGS = {
     'ইন্টারভিউ', 'টাকাপয়সা নিয়ে কথা বলা', 'সাহায্য চাওয়া', 'রেস্তোরাঁ (অর্ডার ও পেমেন্ট)', 'ডাক্তার দেখানো',
     'ভোটার নিবন্ধন', '৯১১-এ ফোন করা', 'স্কুল নিয়ে কথা বলা', 'আবহাওয়া ও ঝড়',
     'অভিভাবক-শিক্ষক সভা', 'MTA-তে চলাচল ও পথনির্দেশ', 'পার্টির পরিকল্পনা', 'বন্ধুর সাথে পরিকল্পনা করা', 'অ্যাপয়েন্টমেন্ট নেওয়া',
+    'লগ আউট',
   ],
   ht: [
     'Pratike', 'Chwazi yon sijè pou pale:', 'Pratik jeneral', 'Kòd klas MOIA', 'Ajoute', 'Nou pa jwenn kòd sa a. Tanpri mande pwofesè w.',
@@ -468,6 +474,7 @@ const PRACTICE_STRINGS = {
     'Entèvyou', 'Pale sou lajan', 'Mande èd', 'Restoran (kòmande ak peye)', 'Ale kay doktè',
     'Enskri pou vote', 'Rele 911', 'Pale sou lekòl', 'Tan ak tanpèt',
     'Reyinyon paran ak pwofesè', 'Deplase ak MTA ak mande direksyon', 'Planifye yon fèt', 'Fè plan ak yon zanmi', 'Pran yon randevou',
+    'Dekonekte',
   ],
   ko: [
     '연습', '대화할 주제를 고르세요:', '자유 연습', 'MOIA 수업 코드', '추가', '코드를 찾을 수 없습니다. 선생님께 물어보세요.',
@@ -476,6 +483,7 @@ const PRACTICE_STRINGS = {
     '면접', '돈 관리에 대해 이야기하기', '도움 요청하기', '식당 (주문과 계산)', '병원 방문',
     '유권자 등록', '911에 전화하기', '학교에 대해 이야기하기', '날씨와 폭풍',
     '학부모-교사 상담', 'MTA 이용과 길 찾기', '파티 계획하기', '친구와 약속 잡기', '예약하기',
+    '로그아웃',
   ],
   ar: [
     'تدرّب', 'اختر موضوعاً للحديث عنه:', 'تدريب عام', 'رمز صف MOIA', 'إضافة', 'لم نجد هذا الرمز. يُرجى سؤال معلّمك.',
@@ -484,6 +492,7 @@ const PRACTICE_STRINGS = {
     'مقابلة', 'التحدث عن الأمور المالية', 'طلب المساعدة', 'المطعم (الطلب والدفع)', 'زيارة الطبيب',
     'التسجيل للتصويت', 'الاتصال بـ 911', 'التحدث عن المدرسة', 'الطقس والعواصف',
     'اجتماع أولياء الأمور والمعلمين', 'التنقل في MTA والسؤال عن الاتجاهات', 'التخطيط لحفلة', 'وضع خطط مع صديق', 'حجز موعد',
+    'تسجيل الخروج',
   ],
   ur: [
     'مشق', 'بات کرنے کے لیے ایک موضوع منتخب کریں:', 'عام مشق', 'MOIA کلاس کوڈ', 'شامل کریں', 'ہمیں یہ کوڈ نہیں ملا۔ براہ کرم اپنے استاد سے پوچھیں۔',
@@ -492,6 +501,7 @@ const PRACTICE_STRINGS = {
     'انٹرویو', 'مالی معاملات کے بارے میں بات کرنا', 'مدد مانگنا', 'ریستوران (آرڈر اور ادائیگی)', 'ڈاکٹر کے پاس جانا',
     'ووٹ کے لیے رجسٹر کرنا', '911 پر کال کرنا', 'اسکول کے بارے میں بات کرنا', 'موسم اور طوفان',
     'والدین اور استاد کی ملاقات', 'MTA میں سفر اور راستہ پوچھنا', 'پارٹی کی منصوبہ بندی', 'دوست کے ساتھ منصوبہ بنانا', 'اپوائنٹمنٹ بک کرنا',
+    'لاگ آؤٹ',
   ],
   fr: [
     'Pratiquer', 'Choisissez un sujet de conversation :', 'Pratique libre', 'Code de classe MOIA', 'Ajouter', 'Nous ne trouvons pas ce code. Demandez à votre professeur.',
@@ -500,6 +510,7 @@ const PRACTICE_STRINGS = {
     'Entretien', "Parler d'argent", "Demander de l'aide", 'Restaurant (commander et payer)', 'Aller chez le médecin',
     "S'inscrire pour voter", 'Appeler le 911', "Parler de l'école", 'La météo et les tempêtes',
     'Réunion parents-professeurs', 'Se déplacer avec la MTA et demander son chemin', 'Organiser une fête', 'Faire des projets avec un ami', 'Prendre rendez-vous',
+    'Se déconnecter',
   ],
   pl: [
     'Ćwicz', 'Wybierz temat rozmowy:', 'Ćwiczenie ogólne', 'Kod klasy MOIA', 'Dodaj', 'Nie znaleźliśmy tego kodu. Zapytaj nauczyciela.',
@@ -508,6 +519,7 @@ const PRACTICE_STRINGS = {
     'Rozmowa kwalifikacyjna', 'Rozmowa o finansach', 'Prośba o pomoc', 'Restauracja (zamawianie i płacenie)', 'Wizyta u lekarza',
     'Rejestracja do głosowania', 'Dzwonienie pod 911', 'Rozmowa o szkole', 'Pogoda i burze',
     'Spotkanie rodziców z nauczycielem', 'Poruszanie się MTA i pytanie o drogę', 'Planowanie imprezy', 'Umawianie się z przyjacielem', 'Umawianie wizyty',
+    'Wyloguj się',
   ],
 };
 

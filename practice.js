@@ -140,6 +140,13 @@ function write(key, value) {
   });
 })();
 
+// ---- Log out ----
+// Forget who is signed in on this tab, then go back to the welcome page.
+document.getElementById('log-out').addEventListener('click', () => {
+  write(PROFILE_KEY, null);
+  write(CLASS_KEY, null);
+});
+
 // ---- Topics ----
 // The conversation page isn't built yet. When it is, send the student there with the topic.
 document.querySelectorAll('[data-topic]').forEach(btn => {
