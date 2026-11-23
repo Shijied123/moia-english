@@ -148,9 +148,8 @@ document.getElementById('log-out').addEventListener('click', () => {
 });
 
 // ---- Topics ----
-// The conversation page isn't built yet. When it is, send the student there with the topic.
-document.querySelectorAll('[data-topic]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    // TODO: location.href = `conversation.html?topic=${btn.dataset.topic}`;
-  });
+// Only "Talking About School" has a conversation page so far.
+// The other topics and General Practice don't do anything yet.
+document.querySelector('[data-topic="school"]').addEventListener('click', () => {
+  location.href = 'conversation.html?topic=school';
 });

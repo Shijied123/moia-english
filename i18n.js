@@ -527,6 +527,123 @@ Object.entries(PRACTICE_STRINGS).forEach(([code, values]) => {
   PRACTICE_KEYS.forEach((key, i) => { STRINGS[code][key] = values[i]; });
 });
 
+// Conversation page text. Each language's list follows CONVO_KEYS in order.
+// 'en' is here too because conversation.js writes most of these with window.t().
+// The transcript itself (what the student and teacher say) always stays in English.
+const CONVO_KEYS = [
+  'ai_teacher', 'transcript', 'you_label', 'teacher_label',
+  'tap_to_talk', 'listening', 'teacher_talking', 'thinking', 'stop_listening',
+  'type_answer', 'send', 'hide', 'show', 'hide_transcript', 'show_transcript',
+  'translate_to', 'hear_again', 'tap_to_hear',
+  'no_speech_support', 'mic_blocked', 'no_mic', 'didnt_hear',
+  'great_practice', 'start_over', 'demo_mode', 'try_again', 'network_error', 'translating',
+];
+
+const CONVO_STRINGS = {
+  en: [
+    'AI teacher', 'Transcript', 'You:', 'Teacher:',
+    'Tap to talk', 'Listening…', 'Teacher is talking…', 'Thinking…', 'Stop listening',
+    'Or type your answer here', 'Send', 'Hide', 'Show', 'Hide transcript', 'Show transcript',
+    'Translate to', 'Hear again', 'Tap to hear the teacher',
+    "Your browser can't hear you. Type instead.", 'The microphone is blocked. Allow it in your browser settings, or type instead.', "We can't find a microphone. Type instead.", "I didn't hear you. Tap to try again.",
+    'Great practice today!', 'Start over', 'Demo mode — not connected to AI yet', 'Try again', "We can't reach the teacher. Check your internet and try again.", 'Translating…',
+  ],
+  es: [
+    'Maestra de IA', 'Transcripción', 'Tú:', 'Maestra:',
+    'Toca para hablar', 'Escuchando…', 'La maestra está hablando…', 'Pensando…', 'Dejar de escuchar',
+    'O escribe tu respuesta aquí', 'Enviar', 'Ocultar', 'Mostrar', 'Ocultar la transcripción', 'Mostrar la transcripción',
+    'Traducir a', 'Escuchar otra vez', 'Toca para escuchar a la maestra',
+    'Tu navegador no puede escucharte. Escribe tu respuesta.', 'El micrófono está bloqueado. Permítelo en la configuración del navegador o escribe tu respuesta.', 'No encontramos un micrófono. Escribe tu respuesta.', 'No te escuché. Toca para intentarlo otra vez.',
+    '¡Practicaste muy bien hoy!', 'Empezar de nuevo', 'Modo de prueba: todavía no está conectado a la IA', 'Intentar otra vez', 'No podemos conectar con la maestra. Revisa tu internet e inténtalo otra vez.', 'Traduciendo…',
+  ],
+  'zh-Hans': [
+    'AI 老师', '对话记录', '你：', '老师：',
+    '点一下开始说话', '正在听…', '老师正在说话…', '正在思考…', '停止收听',
+    '或者在这里输入你的回答', '发送', '隐藏', '显示', '隐藏对话记录', '显示对话记录',
+    '翻译成', '再听一遍', '点一下听老师说话',
+    '你的浏览器听不到你的声音。请改用打字。', '麦克风被阻止了。请在浏览器设置中允许使用麦克风，或者改用打字。', '找不到麦克风。请改用打字。', '我没听到你说话。点一下再试一次。',
+    '今天练习得很好！', '重新开始', '演示模式——还没有连接 AI', '再试一次', '联系不上老师。请检查网络，然后再试一次。', '正在翻译…',
+  ],
+  'zh-Hant': [
+    'AI 老師', '對話記錄', '你：', '老師：',
+    '點一下開始說話', '正在聽…', '老師正在說話…', '正在思考…', '停止收聽',
+    '或者在這裡輸入你的回答', '傳送', '隱藏', '顯示', '隱藏對話記錄', '顯示對話記錄',
+    '翻譯成', '再聽一遍', '點一下聽老師說話',
+    '你的瀏覽器聽不到你的聲音。請改用打字。', '麥克風被封鎖了。請在瀏覽器設定中允許使用麥克風，或者改用打字。', '找不到麥克風。請改用打字。', '我沒聽到你說話。點一下再試一次。',
+    '今天練習得很好！', '重新開始', '示範模式——還沒有連接 AI', '再試一次', '聯絡不上老師。請檢查網路，然後再試一次。', '正在翻譯…',
+  ],
+  ru: [
+    'ИИ-учитель', 'Текст разговора', 'Вы:', 'Учитель:',
+    'Нажмите, чтобы говорить', 'Слушаю…', 'Учитель говорит…', 'Думаю…', 'Перестать слушать',
+    'Или напишите ответ здесь', 'Отправить', 'Скрыть', 'Показать', 'Скрыть текст разговора', 'Показать текст разговора',
+    'Перевести на', 'Послушать ещё раз', 'Нажмите, чтобы услышать учителя',
+    'Ваш браузер вас не слышит. Напишите ответ.', 'Микрофон заблокирован. Разрешите его в настройках браузера или напишите ответ.', 'Мы не нашли микрофон. Напишите ответ.', 'Ничего не слышно. Нажмите и попробуйте ещё раз.',
+    'Сегодня вы хорошо позанимались!', 'Начать заново', 'Демо-режим — ИИ пока не подключён', 'Попробовать ещё раз', 'Не удаётся связаться с учителем. Проверьте интернет и попробуйте ещё раз.', 'Идёт перевод…',
+  ],
+  bn: [
+    'এআই শিক্ষক', 'কথোপকথনের লেখা', 'আপনি:', 'শিক্ষক:',
+    'কথা বলতে চাপুন', 'শুনছি…', 'শিক্ষক কথা বলছেন…', 'ভাবছি…', 'শোনা বন্ধ করুন',
+    'অথবা এখানে আপনার উত্তর লিখুন', 'পাঠান', 'লুকান', 'দেখান', 'কথোপকথনের লেখা লুকান', 'কথোপকথনের লেখা দেখান',
+    'অনুবাদের ভাষা', 'আবার শুনুন', 'শিক্ষকের কথা শুনতে চাপুন',
+    'আপনার ব্রাউজার আপনার কথা শুনতে পারছে না। লিখে উত্তর দিন।', 'মাইক্রোফোন বন্ধ করা আছে। ব্রাউজারের সেটিংসে অনুমতি দিন, অথবা লিখে উত্তর দিন।', 'কোনো মাইক্রোফোন পাওয়া যায়নি। লিখে উত্তর দিন।', 'আপনার কথা শোনা যায়নি। আবার চেষ্টা করতে চাপুন।',
+    'আজ খুব ভালো অনুশীলন হয়েছে!', 'আবার শুরু করুন', 'ডেমো মোড — এখনও এআই-এর সাথে যুক্ত নয়', 'আবার চেষ্টা করুন', 'শিক্ষকের সাথে যোগাযোগ করা যাচ্ছে না। ইন্টারনেট দেখে আবার চেষ্টা করুন।', 'অনুবাদ হচ্ছে…',
+  ],
+  ht: [
+    'Pwofesè AI', 'Tèks konvèsasyon an', 'Ou:', 'Pwofesè:',
+    'Peze pou pale', 'M ap koute…', 'Pwofesè a ap pale…', 'M ap reflechi…', 'Sispann koute',
+    'Oswa ekri repons ou la a', 'Voye', 'Kache', 'Montre', 'Kache tèks konvèsasyon an', 'Montre tèks konvèsasyon an',
+    'Tradui an', 'Koute ankò', 'Peze pou tande pwofesè a',
+    'Navigatè ou a pa ka tande w. Ekri pito.', 'Mikwofòn nan bloke. Pèmèt li nan paramèt navigatè a, oswa ekri pito.', 'Nou pa jwenn yon mikwofòn. Ekri pito.', 'Mwen pa t tande w. Peze pou eseye ankò.',
+    'Ou pratike byen jodi a!', 'Rekòmanse', 'Mòd demo — poko konekte ak AI', 'Eseye ankò', 'Nou pa ka jwenn pwofesè a. Tcheke entènèt ou epi eseye ankò.', 'N ap tradui…',
+  ],
+  ko: [
+    'AI 선생님', '대화 내용', '나:', '선생님:',
+    '눌러서 말하기', '듣고 있어요…', '선생님이 말하고 있어요…', '생각 중…', '듣기 멈추기',
+    '또는 여기에 답을 입력하세요', '보내기', '숨기기', '보기', '대화 내용 숨기기', '대화 내용 보기',
+    '번역할 언어', '다시 듣기', '눌러서 선생님 말 듣기',
+    '브라우저가 목소리를 들을 수 없어요. 대신 입력하세요.', '마이크가 차단되어 있어요. 브라우저 설정에서 허용하거나 대신 입력하세요.', '마이크를 찾을 수 없어요. 대신 입력하세요.', '잘 듣지 못했어요. 눌러서 다시 해 보세요.',
+    '오늘 정말 잘 연습했어요!', '처음부터 다시', '데모 모드 — 아직 AI에 연결되지 않았어요', '다시 시도', '선생님과 연결할 수 없어요. 인터넷을 확인하고 다시 시도하세요.', '번역 중…',
+  ],
+  ar: [
+    'معلّمة بالذكاء الاصطناعي', 'نص المحادثة', 'أنت:', 'المعلّمة:',
+    'اضغط لتتكلم', 'جارٍ الاستماع…', 'المعلّمة تتكلم…', 'جارٍ التفكير…', 'إيقاف الاستماع',
+    'أو اكتب إجابتك هنا', 'إرسال', 'إخفاء', 'إظهار', 'إخفاء نص المحادثة', 'إظهار نص المحادثة',
+    'الترجمة إلى', 'استمع مرة أخرى', 'اضغط لتسمع المعلّمة',
+    'متصفحك لا يستطيع سماعك. اكتب بدلاً من ذلك.', 'الميكروفون محظور. اسمح به من إعدادات المتصفح، أو اكتب بدلاً من ذلك.', 'لم نجد ميكروفوناً. اكتب بدلاً من ذلك.', 'لم أسمعك. اضغط لتحاول مرة أخرى.',
+    'تدريب رائع اليوم!', 'ابدأ من جديد', 'وضع تجريبي — غير متصل بالذكاء الاصطناعي بعد', 'حاول مرة أخرى', 'لا يمكننا الوصول إلى المعلّمة. تحقق من الإنترنت وحاول مرة أخرى.', 'جارٍ الترجمة…',
+  ],
+  ur: [
+    'اے آئی استاد', 'گفتگو کا متن', 'آپ:', 'استاد:',
+    'بولنے کے لیے دبائیں', 'سن رہے ہیں…', 'استاد بول رہے ہیں…', 'سوچ رہے ہیں…', 'سننا بند کریں',
+    'یا اپنا جواب یہاں لکھیں', 'بھیجیں', 'چھپائیں', 'دکھائیں', 'گفتگو کا متن چھپائیں', 'گفتگو کا متن دکھائیں',
+    'ترجمے کی زبان', 'دوبارہ سنیں', 'استاد کی بات سننے کے لیے دبائیں',
+    'آپ کا براؤزر آپ کی آواز نہیں سن سکتا۔ اس کے بجائے لکھیں۔', 'مائیکروفون بند ہے۔ براؤزر کی ترتیبات میں اجازت دیں، یا اس کے بجائے لکھیں۔', 'کوئی مائیکروفون نہیں ملا۔ اس کے بجائے لکھیں۔', 'آپ کی آواز سنائی نہیں دی۔ دوبارہ کوشش کرنے کے لیے دبائیں۔',
+    'آج بہت اچھی مشق ہوئی!', 'دوبارہ شروع کریں', 'ڈیمو موڈ — ابھی اے آئی سے منسلک نہیں', 'دوبارہ کوشش کریں', 'استاد سے رابطہ نہیں ہو پا رہا۔ اپنا انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔', 'ترجمہ ہو رہا ہے…',
+  ],
+  fr: [
+    'Professeure IA', 'Transcription', 'Vous :', 'Professeure :',
+    'Touchez pour parler', "J'écoute…", 'La professeure parle…', 'Réflexion…', "Arrêter l'écoute",
+    'Ou écrivez votre réponse ici', 'Envoyer', 'Masquer', 'Afficher', 'Masquer la transcription', 'Afficher la transcription',
+    'Traduire en', 'Réécouter', 'Touchez pour écouter la professeure',
+    'Votre navigateur ne peut pas vous entendre. Écrivez votre réponse.', 'Le micro est bloqué. Autorisez-le dans les paramètres du navigateur, ou écrivez votre réponse.', 'Nous ne trouvons pas de micro. Écrivez votre réponse.', 'Je ne vous ai pas entendu. Touchez pour réessayer.',
+    "Très bon entraînement aujourd'hui !", 'Recommencer', "Mode démo — pas encore connecté à l'IA", 'Réessayer', 'Impossible de joindre la professeure. Vérifiez votre connexion internet et réessayez.', 'Traduction…',
+  ],
+  pl: [
+    'Nauczycielka AI', 'Zapis rozmowy', 'Ty:', 'Nauczycielka:',
+    'Dotknij, aby mówić', 'Słucham…', 'Nauczycielka mówi…', 'Myślę…', 'Zatrzymaj słuchanie',
+    'Albo wpisz tutaj swoją odpowiedź', 'Wyślij', 'Ukryj', 'Pokaż', 'Ukryj zapis rozmowy', 'Pokaż zapis rozmowy',
+    'Przetłumacz na', 'Posłuchaj jeszcze raz', 'Dotknij, aby usłyszeć nauczycielkę',
+    'Twoja przeglądarka cię nie słyszy. Napisz odpowiedź.', 'Mikrofon jest zablokowany. Zezwól na niego w ustawieniach przeglądarki albo napisz odpowiedź.', 'Nie znaleźliśmy mikrofonu. Napisz odpowiedź.', 'Nic nie słychać. Dotknij i spróbuj jeszcze raz.',
+    'To był świetny trening!', 'Zacznij od nowa', 'Tryb demo — jeszcze bez połączenia z AI', 'Spróbuj ponownie', 'Nie możemy połączyć się z nauczycielką. Sprawdź internet i spróbuj ponownie.', 'Tłumaczenie…',
+  ],
+};
+
+// English goes where window.t() looks for it; the other languages go into STRINGS.
+Object.entries(CONVO_STRINGS).forEach(([code, values]) => {
+  const target = code === 'en' ? ENGLISH_ONLY_IN_JS : STRINGS[code];
+  CONVO_KEYS.forEach((key, i) => { target[key] = values[i]; });
+});
+
 (function () {
   const STORAGE_KEY = 'practice-english-language';
   const SITE_NAME = 'Practice English';
