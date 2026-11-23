@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" data-title-key="practice">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice · Practice English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="profile">
+      <div class="avatar" id="avatar" aria-hidden="true"></div>
+      <div>
+        <div class="profile-name" id="profile-name">Student</div>
+        <div class="profile-contact" id="profile-contact"></div>
+      </div>
+    </div>
+
+    <section class="side-section">
+      <h2 class="side-label" data-i18n="class_code">MOIA class code</h2>
+      <form class="code-form" id="code-form" novalidate>
+        <input id="code-input" class="side-input" type="text" autocomplete="off" autocapitalize="characters" aria-label="MOIA class code">
+        <button class="small-btn" type="submit" data-i18n="add_code">Add</button>
+      </form>
+      <p class="side-error" id="code-error" data-i18n="code_not_found" hidden>We can't find that code. Please ask your teacher.</p>
+      <div class="class-card" id="class-card" hidden>
+        <div class="class-row"><span class="side-label" data-i18n="class_location">Location</span><span id="class-location"></span></div>
+        <div class="class-row"><span class="side-label" data-i18n="class_teacher">Teacher</span><span id="class-teacher"></span></div>
+        <button class="link-btn" id="class-change" type="button" data-i18n="change">Change</button>
+      </div>
+    </section>
+
+    <div class="lang-wrap">
+      <button class="pill" id="lang-button" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>
+        <span data-i18n="choose_language">Choose Language</span>
+      </button>
+    </div>
+
+    <div class="stat">
+      <span data-i18n="total_hours">Total hours</span>
+      <strong id="total-hours">0</strong>
+    </div>
+
+    <button class="pill" type="button" id="settings-button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="settings">Settings</span>
+    </button>
+
+    <section class="side-section translate" id="translate">
+      <h2 class="side-label" data-i18n="translate">Translate</h2>
+      <div class="tr-panes" id="tr-panes">
+        <div class="tr-pane" id="tr-theirs">
+          <select id="tr-lang" class="side-input tr-head" aria-label="Your language"></select>
+          <textarea id="tr-theirs-text" class="side-input" rows="3" data-i18n-placeholder="type_here" placeholder="Type here"></textarea>
+        </div>
+        <button class="swap-btn" id="tr-swap" type="button" aria-label="Swap languages">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M21 16l-4 4-4-4"/></svg>
+        </button>
+        <div class="tr-pane" id="tr-english">
+          <div class="tr-head tr-fixed" data-i18n="english_label">English</div>
+          <textarea id="tr-english-text" class="side-input" rows="3" lang="en" readonly></textarea>
+        </div>
+      </div>
+      <button class="small-btn wide" id="tr-go" type="button" data-i18n="translate">Translate</button>
+      <p class="side-error" id="tr-error" hidden></p>
+    </section>
+  </aside>
+
+  <main class="practice-main">
+    <h1 data-i18n="practice">Practice</h1>
+    <p class="lead" data-i18n="choose_topic">Choose a topic to talk about:</p>
+
+    <div class="topics">
+      <button class="topic" type="button" data-topic="interview"><span class="en" lang="en">Interview</span><span class="tr" data-i18n-hint="topic_interview"></span></button>
+      <button class="topic" type="button" data-topic="finances"><span class="en" lang="en">Talking About Finances</span><span class="tr" data-i18n-hint="topic_finances"></span></button>
+      <button class="topic" type="button" data-topic="help"><span class="en" lang="en">Requesting Help</span><span class="tr" data-i18n-hint="topic_help"></span></button>
+      <button class="topic" type="button" data-topic="restaurant"><span class="en" lang="en">Restaurant (Ordering + Paying)</span><span class="tr" data-i18n-hint="topic_restaurant"></span></button>
+      <button class="topic" type="button" data-topic="doctor"><span class="en" lang="en">Visiting the Doctor</span><span class="tr" data-i18n-hint="topic_doctor"></span></button>
+      <button class="topic" type="button" data-topic="vote"><span class="en" lang="en">Register to Vote</span><span class="tr" data-i18n-hint="topic_vote"></span></button>
+      <button class="topic" type="button" data-topic="911"><span class="en" lang="en">Calling 911</span><span class="tr" data-i18n-hint="topic_911"></span></button>
+      <button class="topic" type="button" data-topic="school"><span class="en" lang="en">Talking About School</span><span class="tr" data-i18n-hint="topic_school"></span></button>
+      <button class="topic" type="button" data-topic="weather"><span class="en" lang="en">Weather / Storms</span><span class="tr" data-i18n-hint="topic_weather"></span></button>
+      <button class="topic" type="button" data-topic="conversation"><span class="en" lang="en">General Conversation</span><span class="tr" data-i18n-hint="topic_conversation"></span></button>
+      <button class="topic" type="button" data-topic="parent-teacher"><span class="en" lang="en">Parent/Teacher Conference</span><span class="tr" data-i18n-hint="topic_parent_teacher"></span></button>
+      <button class="topic" type="button" data-topic="mta"><span class="en" lang="en">Navigating the MTA / Directions</span><span class="tr" data-i18n-hint="topic_mta"></span></button>
+      <button class="topic" type="button" data-topic="party"><span class="en" lang="en">Planning a Party</span><span class="tr" data-i18n-hint="topic_party"></span></button>
+      <button class="topic" type="button" data-topic="friends"><span class="en" lang="en">Making Plans with a Friend</span><span class="tr" data-i18n-hint="topic_friends"></span></button>
+      <button class="topic" type="button" data-topic="appointment"><span class="en" lang="en">Booking an Appointment</span><span class="tr" data-i18n-hint="topic_appointment"></span></button>
+    </div>
+
+    <button class="general" type="button" data-topic="general">
+      <span class="en" lang="en">General Practice</span>
+      <span class="tr" data-i18n-hint="general_practice"></span>
+    </button>
+  </main>
+</div>
+<script src="i18n.js"></script>
+<script src="practice.js"></script>
+</body>
+</html>

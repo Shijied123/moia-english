@@ -95,6 +95,14 @@
     const bad = inputs.filter(i => !check(i));
     if (bad.length) { bad[0].focus(); return; }
     // TODO: send to the server once there is one.
+    // For now, keep the name and contact (never the password) for the Practice page.
+    try {
+      sessionStorage.setItem('practice-english-profile', JSON.stringify({
+        name: form.elements.name.value.trim(),
+        contact: form.contact.value.trim(),
+      }));
+    } catch {}
+    location.href = 'practice.html';
   });
 </script>
 <script src="i18n.js"></script>

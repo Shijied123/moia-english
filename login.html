@@ -58,6 +58,13 @@
     const bad = [...form.querySelectorAll('input')].filter(i => !check(i));
     if (bad.length) { bad[0].focus(); return; }
     // TODO: check the password with the server once there is one.
+    // For now, any email/phone and password goes through to the Practice page.
+    try {
+      sessionStorage.setItem('practice-english-profile', JSON.stringify({
+        contact: form.contact.value.trim(),
+      }));
+    } catch {}
+    location.href = 'practice.html';
   });
 </script>
 <script src="i18n.js"></script>
