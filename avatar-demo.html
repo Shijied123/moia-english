@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teacher avatar test</title>
+<style>
+  :root { --bg: #f6f4ef; --card: #ffffff; --ink: #1d2433; --muted: #5a6275; --line: #e3dfd5; --primary: #1f5fd1; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 24px; margin: 0 0 16px; }
+  .stage {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--card);
+  }
+  .stage.tall { aspect-ratio: 3 / 4; max-width: 420px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  button {
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  button:hover { border-color: #c9c4b8; }
+  button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  #status { color: var(--muted); font-size: 16px; margin-top: 12px; min-height: 1.5em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Teacher avatar test</h1>
+  <div class="stage" id="stage"></div>
+  <div class="controls">
+    <button type="button" id="start">Start talking</button>
+    <button type="button" id="stop">Stop</button>
+    <button type="button" id="listen" aria-pressed="false">Listening: off</button>
+    <button type="button" id="speak" class="primary">Speak sample</button>
+  </div>
+  <p id="status">Ready.</p>
+</main>
+<script src="avatar.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var stage = document.getElementById('stage');
+  if (params.get('tall') === '1') stage.classList.add('tall');
+
+  var avatar = window.createAvatar(stage);
+  var status = document.getElementById('status');
+  var listenBtn = document.getElementById('listen');
+  var listening = false;
+
+  function say(text) { status.textContent = text; }
+
+  document.getElementById('start').addEventListener('click', function () {
+    avatar.startTalking(); say('Talking.');
+  });
+  document.getElementById('stop').addEventListener('click', function () {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    avatar.stopTalking(); say('Stopped.');
+  });
+  listenBtn.addEventListener('click', function () {
+    listening = !listening;
+    avatar.setListening(listening);
+    listenBtn.textContent = 'Listening: ' + (listening ? 'on' : 'off');
+    listenBtn.setAttribute('aria-pressed', String(listening));
+  });
+
+  function englishVoice() {
+    var voices = window.speechSynthesis.getVoices() || [];
+    var en = voices.filter(function (v) { return /^en([-_]|$)/i.test(v.lang); });
+    var us = en.filter(function (v) { return /^en[-_]US/i.test(v.lang); });
+    return us[0] || en[0] || null;
+  }
+  if (window.speechSynthesis) window.speechSynthesis.getVoices(); // start loading voices
+
+  document.getElementById('speak').addEventListener('click', function () {
+    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
+      say('This browser cannot speak.'); return;
+    }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(
+      'Hello! I am your English teacher. Today we will practice ordering food at a restaurant. ' +
+      'What would you like to eat?');
+    var v = englishVoice();
+    if (v) u.voice = v;
+    u.lang = v ? v.lang : 'en-US';
+    u.rate = 0.95;
+    u.onstart = function () { avatar.startTalking(); say('Speaking.'); };
+    u.onboundary = function () { avatar.pulse(); };
+    u.onend = function () { avatar.stopTalking(); say('Done.'); };
+    u.onerror = function () { avatar.stopTalking(); say('Speech stopped.'); };
+    window.speechSynthesis.speak(u);
+  });
+
+  // Test options: ?talk=1 starts talking on load, ?listen=1 turns listening on,
+  // ?mouth=open|o|ee|slight shows one mouth shape, ?tall=1 uses a 3:4 box.
+  if (params.get('listen') === '1') listenBtn.click();
+  if (params.get('mouth')) avatar.setMouth(params.get('mouth'));
+  if (params.get('talk') === '1') { avatar.startTalking(); say('Talking.'); }
+})();
+</script>
+</body>
+</html>

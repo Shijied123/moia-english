@@ -1,0 +1,7 @@
+name = "moia-english-teacher"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+# Workers AI. Uses the free daily allowance on Cloudflare's free plan. No API key needed.
+[ai]
+binding = "AI"
