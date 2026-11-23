@@ -274,7 +274,7 @@ textarea.side-input { resize: vertical; min-height: 64px; }
 .tr-panes { display: flex; flex-direction: column; gap: 6px; }
 .tr-panes.reversed { flex-direction: column-reverse; }
 .tr-pane { display: grid; gap: 6px; }
-.tr-fixed { font-weight: 700; font-size: 16px; padding: 8px 2px 0; }
+.tr-fixed { display: flex; align-items: center; background: var(--bg); }
 .swap-btn {
   align-self: center;
   width: 36px; height: 36px;
@@ -297,10 +297,16 @@ textarea.side-input { resize: vertical; min-height: 64px; }
 .practice-main h1 { margin-bottom: 4px; }
 .practice-main .lead { margin-bottom: 28px; }
 .topics {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 12px;
+  /* Flex (not grid) so a short last row sits in the center. */
+  --cols: 4;
+  --gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
 }
+.topics .topic { flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols)); }
+@media (max-width: 1100px) and (min-width: 801px) { .topics { --cols: 3; } }
 .topic, .general {
   font: inherit;
   color: var(--ink);
@@ -332,7 +338,7 @@ textarea.side-input { resize: vertical; min-height: 64px; }
   .app { grid-template-columns: 1fr; }
   .practice-main { padding: 28px 16px 32px; }
   .sidebar { order: 2; border-inline-end: 0; border-top: 1px solid var(--line); padding: 24px 16px 40px; }
-  .topics { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .topics { --cols: 2; }
 }
 
 /* Make the hidden attribute win over display rules above. */

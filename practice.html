@@ -61,7 +61,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M21 16l-4 4-4-4"/></svg>
         </button>
         <div class="tr-pane" id="tr-english">
-          <div class="tr-head tr-fixed" data-i18n="english_label">English</div>
+          <div class="side-input tr-head tr-fixed" lang="en">English</div>
           <textarea id="tr-english-text" class="side-input" rows="3" lang="en" readonly></textarea>
         </div>
       </div>
@@ -75,6 +75,7 @@
     <p class="lead" data-i18n="choose_topic">Choose a topic to talk about:</p>
 
     <div class="topics">
+      <button class="topic" type="button" data-topic="school"><span class="en" lang="en">Talking About School</span><span class="tr" data-i18n-hint="topic_school"></span></button>
       <button class="topic" type="button" data-topic="interview"><span class="en" lang="en">Interview</span><span class="tr" data-i18n-hint="topic_interview"></span></button>
       <button class="topic" type="button" data-topic="finances"><span class="en" lang="en">Talking About Finances</span><span class="tr" data-i18n-hint="topic_finances"></span></button>
       <button class="topic" type="button" data-topic="help"><span class="en" lang="en">Requesting Help</span><span class="tr" data-i18n-hint="topic_help"></span></button>
@@ -82,9 +83,7 @@
       <button class="topic" type="button" data-topic="doctor"><span class="en" lang="en">Visiting the Doctor</span><span class="tr" data-i18n-hint="topic_doctor"></span></button>
       <button class="topic" type="button" data-topic="vote"><span class="en" lang="en">Register to Vote</span><span class="tr" data-i18n-hint="topic_vote"></span></button>
       <button class="topic" type="button" data-topic="911"><span class="en" lang="en">Calling 911</span><span class="tr" data-i18n-hint="topic_911"></span></button>
-      <button class="topic" type="button" data-topic="school"><span class="en" lang="en">Talking About School</span><span class="tr" data-i18n-hint="topic_school"></span></button>
       <button class="topic" type="button" data-topic="weather"><span class="en" lang="en">Weather / Storms</span><span class="tr" data-i18n-hint="topic_weather"></span></button>
-      <button class="topic" type="button" data-topic="conversation"><span class="en" lang="en">General Conversation</span><span class="tr" data-i18n-hint="topic_conversation"></span></button>
       <button class="topic" type="button" data-topic="parent-teacher"><span class="en" lang="en">Parent/Teacher Conference</span><span class="tr" data-i18n-hint="topic_parent_teacher"></span></button>
       <button class="topic" type="button" data-topic="mta"><span class="en" lang="en">Navigating the MTA / Directions</span><span class="tr" data-i18n-hint="topic_mta"></span></button>
       <button class="topic" type="button" data-topic="party"><span class="en" lang="en">Planning a Party</span><span class="tr" data-i18n-hint="topic_party"></span></button>
