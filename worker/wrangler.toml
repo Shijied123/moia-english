@@ -2,6 +2,27 @@ name = "moia-english-teacher"
 main = "src/index.js"
 compatibility_date = "2025-06-01"
 
-# Workers AI. Uses the free daily allowance on Cloudflare's free plan. No API key needed.
+# Workers AI: the free fallback brain. No API key needed.
 [ai]
 binding = "AI"
+
+# Plain settings (not secrets). Secrets are set with `npx wrangler secret put NAME`.
+[vars]
+SIMLI_FACE_ID = "14c60d62-6ebf-424d-b626-1f4f91c33b04" # Simli preset "Anna"
+ELEVENLABS_VOICE_ID = "HNAnHNA5Mw1kHmeBNIlO"                 # "Olesia - Warm, Approachable" (American, New York accent)
+
+# Per-visitor limits (per IP address). Period must be 10 or 60 seconds.
+[[ratelimits]]
+name = "CHAT_LIMITER"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "SPEAK_LIMITER"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "TOKEN_LIMITER"
+namespace_id = "1003"
+simple = { limit = 3, period = 60 }

@@ -167,6 +167,160 @@ test('reply is cleaned for reading aloud', async () => {
   assert.equal(res.status, 503);
 });
 
+
+// ---- Paid services: every outside call is faked with a stub fetch. Nothing is charged. ----
+
+function withFetch(handler, fn) {
+  const real = globalThis.fetch;
+  const seen = [];
+  globalThis.fetch = async (input, init = {}) => {
+    const url = typeof input === 'string' ? input : input.url;
+    const headers = new Headers(init.headers || (typeof input === 'string' ? undefined : input.headers));
+    const body = init.body !== undefined ? init.body : (typeof input === 'string' ? undefined : await input.clone().text());
+    const call = { url, method: init.method || (typeof input === 'string' ? 'GET' : input.method), headers, body };
+    seen.push(call);
+    return handler(call);
+  };
+  return fn(seen).finally(() => { globalThis.fetch = real; });
+}
+
+function req(path, { method = 'POST', body, origin = GOOD, ip = '1.2.3.4' } = {}) {
+  return new Request('https://teacher.example' + path, {
+    method,
+    headers: { 'Content-Type': 'application/json', Origin: origin, 'CF-Connecting-IP': ip },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
+const claudeReply = (text, extra = {}) => new Response(JSON.stringify({
+  id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-haiku-5-5',
+  content: [{ type: 'text', text }], stop_reason: 'end_turn', stop_sequence: null,
+  usage: { input_tokens: 10, output_tokens: 5 }, ...extra,
+}), { status: 200, headers: { 'content-type': 'application/json' } });
+
+test('/config reports what is switched on', async () => {
+  let res = await worker.fetch(req('/config', { method: 'GET' }), fakeEnv());
+  assert.deepEqual(await res.json(), { brain: 'free', voice: false, face: false });
+  const env = { ...fakeEnv(), ANTHROPIC_API_KEY: 'k', ELEVENLABS_API_KEY: 'k', ELEVENLABS_VOICE_ID: 'v', SIMLI_API_KEY: 'k' };
+  res = await worker.fetch(req('/config', { method: 'GET' }), env);
+  assert.deepEqual(await res.json(), { brain: 'claude', voice: true, face: true });
+  assert.equal(res.headers.get('Access-Control-Allow-Origin'), GOOD);
+});
+
+test('with a Claude key, /chat uses Claude Haiku 5.5 and not the free model', async () => {
+  const env = { ...fakeEnv(), ANTHROPIC_API_KEY: 'sk-test' };
+  await withFetch(() => claudeReply('Hello! Do you like your English class?'), async (seen) => {
+    const res = await worker.fetch(req('/chat', { body: { topic: 'school', messages: [] } }), env);
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).reply, 'Hello! Do you like your English class?');
+    assert.equal(seen.length, 1);
+    assert.match(seen[0].url, /api\.anthropic\.com\/v1\/messages/);
+    const sent = JSON.parse(seen[0].body);
+    assert.equal(sent.model, 'claude-haiku-5-5');
+    assert.match(sent.system, /Talking About School/);
+    assert.equal(sent.messages[0].role, 'user');
+    assert.ok(!('temperature' in sent));
+    assert.equal(env.calls.length, 0, 'free model must not be called');
+  });
+});
+
+test('Claude failing falls back to the free model', async () => {
+  const env = { ...fakeEnv({ response: 'Free model here.' }), ANTHROPIC_API_KEY: 'sk-test' };
+  await withFetch(() => new Response(JSON.stringify({ type: 'error', error: { type: 'authentication_error', message: 'bad key' } }), { status: 401, headers: { 'content-type': 'application/json' } }), async () => {
+    const res = await worker.fetch(req('/chat', { body: { topic: 'school', messages: [] } }), env);
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).reply, 'Free model here.');
+    assert.equal(env.calls.length, 1);
+  });
+});
+
+test('Claude refusal gives a gentle redirect, not an error', async () => {
+  const env = { ...fakeEnv(), ANTHROPIC_API_KEY: 'sk-test' };
+  await withFetch(() => claudeReply('', { content: [], stop_reason: 'refusal' }), async () => {
+    const res = await worker.fetch(req('/chat', { body: { topic: 'school', messages: [{ role: 'user', content: 'hi' }] } }), env);
+    assert.equal(res.status, 200);
+    assert.match((await res.json()).reply, /something else/);
+  });
+});
+
+test('/speak sends text to ElevenLabs as 16 kHz PCM and returns the audio', async () => {
+  const env = { ...fakeEnv(), ELEVENLABS_API_KEY: 'el-test', ELEVENLABS_VOICE_ID: 'voice123' };
+  const pcm = new Uint8Array([1, 0, 2, 0, 3, 0]);
+  await withFetch(() => new Response(pcm, { status: 200 }), async (seen) => {
+    const res = await worker.fetch(req('/speak', { body: { text: 'Hello there.' } }), env);
+    assert.equal(res.status, 200);
+    assert.deepEqual(new Uint8Array(await res.arrayBuffer()), pcm);
+    assert.equal(res.headers.get('Access-Control-Allow-Origin'), GOOD);
+    assert.equal(seen[0].url, 'https://api.elevenlabs.io/v1/text-to-speech/voice123?output_format=pcm_16000');
+    assert.equal(seen[0].headers.get('xi-api-key'), 'el-test');
+    const sent = JSON.parse(seen[0].body);
+    assert.equal(sent.text, 'Hello there.');
+    assert.equal(sent.model_id, 'eleven_flash_v2_5');
+  });
+});
+
+test('/speak checks setup, empty text and length; ElevenLabs errors -> 503', async () => {
+  let res = await worker.fetch(req('/speak', { body: { text: 'Hi' } }), fakeEnv());
+  assert.equal(res.status, 503);
+  const env = { ...fakeEnv(), ELEVENLABS_API_KEY: 'k', ELEVENLABS_VOICE_ID: 'v' };
+  await withFetch(() => new Response('quota exceeded', { status: 401 }), async (seen) => {
+    res = await worker.fetch(req('/speak', { body: { text: '  ' } }), env);
+    assert.equal(res.status, 400);
+    res = await worker.fetch(req('/speak', { body: { text: 'a'.repeat(601) } }), env);
+    assert.equal(res.status, 400);
+    assert.equal(seen.length, 0, 'no paid call for bad input');
+    res = await worker.fetch(req('/speak', { body: { text: 'Hello.' } }), env);
+    assert.equal(res.status, 503);
+  });
+});
+
+test('/simli-token asks Simli for a 10-minute token and never returns the key', async () => {
+  const env = { ...fakeEnv(), SIMLI_API_KEY: 'simli-secret', SIMLI_FACE_ID: 'face-1' };
+  await withFetch(() => new Response(JSON.stringify({ session_token: 'tok', warnings: [] }), { status: 200 }), async (seen) => {
+    const res = await worker.fetch(req('/simli-token', { body: {} }), env);
+    assert.equal(res.status, 200);
+    const text = await res.text();
+    assert.deepEqual(JSON.parse(text), { session_token: 'tok' });
+    assert.ok(!text.includes('simli-secret'));
+    assert.equal(seen[0].url, 'https://api.simli.ai/compose/token');
+    assert.equal(seen[0].headers.get('x-simli-api-key'), 'simli-secret');
+    const sent = JSON.parse(seen[0].body);
+    assert.equal(sent.faceId, 'face-1');
+    assert.equal(sent.maxSessionLength, 600);
+  });
+});
+
+test('/simli-token without a key or on Simli error -> 503', async () => {
+  let res = await worker.fetch(req('/simli-token', { body: {} }), fakeEnv());
+  assert.equal(res.status, 503);
+  const env = { ...fakeEnv(), SIMLI_API_KEY: 'k' };
+  await withFetch(() => new Response(JSON.stringify({ detail: 'FACE_NOT_ALLOWED' }), { status: 403 }), async () => {
+    res = await worker.fetch(req('/simli-token', { body: {} }), env);
+    assert.equal(res.status, 503);
+  });
+});
+
+test('rate limiter blocks a visitor over the limit with 429 before any paid call', async () => {
+  const keys = [];
+  const env = {
+    ...fakeEnv(), ELEVENLABS_API_KEY: 'k', ELEVENLABS_VOICE_ID: 'v',
+    SPEAK_LIMITER: { async limit({ key }) { keys.push(key); return { success: false }; } },
+  };
+  await withFetch(() => { throw new Error('must not be called'); }, async (seen) => {
+    const res = await worker.fetch(req('/speak', { body: { text: 'Hi.' }, ip: '9.9.9.9' }), env);
+    assert.equal(res.status, 429);
+    assert.equal(seen.length, 0);
+    assert.deepEqual(keys, ['speak:9.9.9.9']);
+  });
+});
+
+test('GET on /chat and POST on /config are rejected', async () => {
+  let res = await worker.fetch(req('/chat', { method: 'GET' }), fakeEnv());
+  assert.equal(res.status, 405);
+  res = await worker.fetch(req('/config', { body: {} }), fakeEnv());
+  assert.equal(res.status, 405);
+});
+
 let failed = 0;
 for (const { name, fn } of tests) {
   try {
