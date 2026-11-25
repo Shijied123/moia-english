@@ -43,9 +43,18 @@
     <h1 class="convo-title"><span class="en" lang="en" id="topic-name">Talking About School</span><span class="tr" id="topic-hint" data-i18n-hint="topic_school"></span></h1>
 
     <div class="stage-wrap">
-      <div class="stage" id="stage"></div>
+      <!-- The illustrated teacher (avatar.js) is added inside #stage. In video mode the realistic
+           teacher (Simli) plays in the <video>, and her voice plays through the <audio>. -->
+      <div class="stage" id="stage">
+        <video class="teacher-video" id="teacher-video" playsinline autoplay muted hidden></video>
+      </div>
+      <audio id="teacher-audio" autoplay hidden></audio>
       <p class="demo-note" id="demo-note" data-i18n="demo_mode" hidden>Demo mode — not connected to AI yet</p>
       <span class="ai-chip" data-i18n="ai_teacher">AI teacher</span>
+      <button class="stage-start" id="stage-start" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 10l5-3v10l-5-3z"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+        <span id="stage-start-label">Start conversation</span>
+      </button>
       <button class="hear-first" id="hear-first" type="button" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
         <span data-i18n="tap_to_hear">Tap to hear the teacher</span>
@@ -67,6 +76,7 @@
 </div>
 <script src="i18n.js"></script>
 <script src="avatar.js"></script>
+<script src="vendor/simli-client-3.2.0.js"></script>
 <script src="conversation.js"></script>
 </body>
 </html>

@@ -644,6 +644,92 @@ Object.entries(CONVO_STRINGS).forEach(([code, values]) => {
   CONVO_KEYS.forEach((key, i) => { target[key] = values[i]; });
 });
 
+// Conversation page: the video teacher and the server's voice. Same pattern as CONVO_KEYS.
+const CONVO_MEDIA_KEYS = [
+  'start_conversation', 'connecting', 'continue_video',
+  'video_ended', 'video_failed', 'voice_failed',
+];
+
+const CONVO_MEDIA_STRINGS = {
+  en: [
+    'Start conversation', 'Connecting…', 'Continue',
+    'The video call ended. Tap Continue to see the teacher again.',
+    "The video teacher can't connect right now. You will hear her voice instead.",
+    "The teacher's voice isn't working right now. You may hear a simpler voice instead.",
+  ],
+  es: [
+    'Empezar la conversación', 'Conectando…', 'Continuar',
+    'La videollamada terminó. Toca Continuar para ver a la maestra otra vez.',
+    'La maestra en video no puede conectarse ahora. Vas a escuchar su voz.',
+    'La voz de la maestra no funciona ahora. Puede que escuches una voz más sencilla.',
+  ],
+  'zh-Hans': [
+    '开始对话', '正在连接…', '继续',
+    '视频通话已结束。点“继续”再次见到老师。',
+    '视频老师现在无法连接。你会听到她的声音。',
+    '老师的声音现在无法使用。你可能会听到一个比较简单的声音。',
+  ],
+  'zh-Hant': [
+    '開始對話', '正在連線…', '繼續',
+    '視訊通話已結束。點「繼續」再次見到老師。',
+    '視訊老師現在無法連線。你會聽到她的聲音。',
+    '老師的聲音現在無法使用。你可能會聽到一個比較簡單的聲音。',
+  ],
+  ru: [
+    'Начать разговор', 'Подключение…', 'Продолжить',
+    'Видеозвонок закончился. Нажмите «Продолжить», чтобы снова увидеть учителя.',
+    'Видео с учителем сейчас не подключается. Вы услышите её голос.',
+    'Голос учителя сейчас не работает. Вы можете услышать более простой голос.',
+  ],
+  bn: [
+    'কথোপকথন শুরু করুন', 'সংযোগ হচ্ছে…', 'চালিয়ে যান',
+    'ভিডিও কল শেষ হয়েছে। শিক্ষককে আবার দেখতে "চালিয়ে যান" চাপুন।',
+    'ভিডিও শিক্ষক এখন সংযুক্ত হতে পারছেন না। আপনি তাঁর কণ্ঠ শুনবেন।',
+    'শিক্ষকের কণ্ঠ এখন কাজ করছে না। আপনি হয়তো একটি সহজ কণ্ঠ শুনবেন।',
+  ],
+  ht: [
+    'Kòmanse konvèsasyon an', 'N ap konekte…', 'Kontinye',
+    'Apèl videyo a fini. Peze Kontinye pou w wè pwofesè a ankò.',
+    'Pwofesè videyo a pa ka konekte kounye a. W ap tande vwa li pito.',
+    'Vwa pwofesè a pa mache kounye a. Ou ka tande yon vwa ki pi senp.',
+  ],
+  ko: [
+    '대화 시작하기', '연결 중…', '계속하기',
+    '영상 통화가 끝났어요. 선생님을 다시 보려면 계속하기를 누르세요.',
+    '지금은 영상 선생님과 연결할 수 없어요. 대신 목소리로 들려 드릴게요.',
+    '지금은 선생님 목소리가 작동하지 않아요. 더 단순한 목소리로 들릴 수 있어요.',
+  ],
+  ar: [
+    'ابدأ المحادثة', 'جارٍ الاتصال…', 'متابعة',
+    'انتهت مكالمة الفيديو. اضغط «متابعة» لترى المعلّمة مرة أخرى.',
+    'لا يمكن الاتصال بالمعلّمة بالفيديو الآن. ستسمع صوتها بدلاً من ذلك.',
+    'صوت المعلّمة لا يعمل الآن. قد تسمع صوتاً أبسط بدلاً منه.',
+  ],
+  ur: [
+    'گفتگو شروع کریں', 'رابطہ ہو رہا ہے…', 'جاری رکھیں',
+    'ویڈیو کال ختم ہو گئی۔ استاد کو دوبارہ دیکھنے کے لیے "جاری رکھیں" دبائیں۔',
+    'ویڈیو والے استاد سے ابھی رابطہ نہیں ہو پا رہا۔ آپ ان کی آواز سنیں گے۔',
+    'استاد کی آواز ابھی کام نہیں کر رہی۔ آپ کو شاید ایک سادہ آواز سنائی دے۔',
+  ],
+  fr: [
+    'Commencer la conversation', 'Connexion…', 'Continuer',
+    "L'appel vidéo est terminé. Touchez Continuer pour revoir la professeure.",
+    "La professeure en vidéo ne peut pas se connecter pour l'instant. Vous entendrez sa voix.",
+    "La voix de la professeure ne marche pas pour l'instant. Vous entendrez peut-être une voix plus simple.",
+  ],
+  pl: [
+    'Zacznij rozmowę', 'Łączenie…', 'Kontynuuj',
+    'Rozmowa wideo się skończyła. Dotknij „Kontynuuj”, aby znów zobaczyć nauczycielkę.',
+    'Nie można teraz połączyć się z nauczycielką wideo. Usłyszysz jej głos.',
+    'Głos nauczycielki teraz nie działa. Możesz usłyszeć prostszy głos.',
+  ],
+};
+
+Object.entries(CONVO_MEDIA_STRINGS).forEach(([code, values]) => {
+  const target = code === 'en' ? ENGLISH_ONLY_IN_JS : STRINGS[code];
+  CONVO_MEDIA_KEYS.forEach((key, i) => { target[key] = values[i]; });
+});
+
 (function () {
   const STORAGE_KEY = 'practice-english-language';
   const SITE_NAME = 'Practice English';

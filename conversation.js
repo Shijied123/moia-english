@@ -4,7 +4,11 @@
 const CHAT_URL = 'https://moia-english-teacher.togud61.workers.dev';
 
 // Conversation page: talk with the AI teacher about one topic.
-// Speech in uses the browser's SpeechRecognition, speech out uses speechSynthesis.
+// Speech in uses the browser's SpeechRecognition.
+// Speech out depends on what the server offers (GET /config):
+//   video mode   (face + voice): a realistic, lip-synced teacher (Simli) speaks the server's voice (/speak).
+//   voice mode   (voice only):   the server's voice plays with Web Audio; the illustrated teacher moves her mouth.
+//   browser mode (neither):      the browser's own speechSynthesis and the illustrated teacher.
 // The chat history lives only in this page's memory; nothing is saved.
 
 const MAX_MESSAGES = 40;      // the server refuses more than this
@@ -13,10 +17,21 @@ const REQUEST_TIMEOUT_MS = 30000;
 const SPEECH_START_WAIT_MS = 2500; // if the opening line has not started by then, the browser blocked it
 const END_LINE = 'Great practice today! Tap "Start over" to talk again.';
 
+const CONFIG_TIMEOUT_MS = 6000;
+const SPEAK_TIMEOUT_MS = 20000;
+const TOKEN_TIMEOUT_MS = 15000;
+const VIDEO_CONNECT_TIMEOUT_MS = 30000; // Simli retries on its own; give up after this and use the voice alone
+const AUDIO_UNLOCK_WAIT_MS = 400;       // how long to wait for the browser to allow sound
+const PCM_BYTES_PER_SECOND = 32000;     // PCM16, 16 kHz, mono
+const SIMLI_CHUNK_BYTES = 6000;         // must stay even (2 bytes per sample)
+const TALK_SAFETY_MS = 1500;            // extra time after the audio's length before "talking" ends by itself
+const VIDEO_MAX_MS = 10 * 60 * 1000;    // a Simli session lasts at most 10 minutes
+const VIDEO_IDLE_MS = 2 * 60 * 1000;    // and ends after 2 minutes with no audio
+const VIDEO_END_EARLY_MS = 3000;        // end it ourselves just before Simli does
+
 // Also tolerates a pasted URL that already ends in /chat or a slash.
-const CHAT_ENDPOINT = CHAT_URL.trim()
-  ? CHAT_URL.trim().replace(/\/+$/, '').replace(/\/chat$/, '') + '/chat'
-  : '';
+const API_BASE = CHAT_URL.trim() ? CHAT_URL.trim().replace(/\/+$/, '').replace(/\/chat$/, '') : '';
+const CHAT_ENDPOINT = API_BASE ? API_BASE + '/chat' : '';
 
 // id -> English name (shown as the heading) and the i18n key for its translation.
 const TOPICS = {
@@ -87,10 +102,16 @@ const MOCK = {
   const form = document.getElementById('type-form');
   const input = document.getElementById('type-input');
   const sendBtn = document.getElementById('send-btn');
+  const stage = document.getElementById('stage');
+  const videoEl = document.getElementById('teacher-video');
+  const audioEl = document.getElementById('teacher-audio');
+  const stageBtn = document.getElementById('stage-start');
+  const stageLabel = document.getElementById('stage-start-label');
+  const backLink = document.querySelector('.convo-top .pill.back');
 
   const noop = () => {};
   const avatar = window.createAvatar
-    ? window.createAvatar(document.getElementById('stage'))
+    ? window.createAvatar(stage)
     : { startTalking: noop, stopTalking: noop, pulse: noop, setListening: noop, destroy: noop };
 
   document.getElementById('demo-note').hidden = !!CHAT_ENDPOINT;
@@ -98,6 +119,24 @@ const MOCK = {
   // What this browser can do.
   const synth = window.speechSynthesis && window.SpeechSynthesisUtterance ? window.speechSynthesis : null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext || null;
+
+  // ---- Which teacher: 'loading' until /config answers, then 'video' | 'voice' | 'browser' ----
+  let mode = API_BASE ? 'loading' : 'browser';
+  // The video session. state: 'off' (not video mode) | 'idle' (before Start) | 'connecting' | 'live' | 'ended'
+  const sim = {
+    state: 'off',
+    client: null,
+    attempt: 0,        // bumped whenever a session is dropped, so late answers from an old attempt are ignored
+    startedAt: 0,
+    lastAudioEnd: 0,   // when the last audio sent to Simli finishes playing (for the idle limit)
+    watchdog: null,
+    talkTimer: null,   // set while the teacher is saying something we sent
+    finishTimer: null, // stops the session after the last line of a finished conversation
+    heardSpeaking: false,
+  };
+  let pendingEntry = null; // a teacher line waiting for the video to start
+  let voiceNoteShown = false;
 
   // ---- State ----
   let history = [];          // [{ role: 'user' | 'assistant', content }]
@@ -139,6 +178,7 @@ const MOCK = {
     else if (busy) text = t('thinking');
     else if (listening) text = t('listening');
     else if (speaking) text = t('teacher_talking');
+    else if (sim.state === 'connecting') text = t('connecting');
     else if (note) { text = t(note); warn = note !== 'didnt_hear'; }
     else if (SR) text = t('tap_to_talk');
     else { text = t('no_speech_support'); warn = true; }
@@ -149,6 +189,22 @@ const MOCK = {
     hideBtn.setAttribute('aria-label', transcriptHidden ? t('show_transcript') : t('hide_transcript'));
     hideBtn.setAttribute('aria-expanded', String(!transcriptHidden));
     input.setAttribute('aria-label', t('type_answer'));
+    renderStage();
+  }
+
+  // Start / Connecting… / Continue button over the stage, and the video in place of the drawing.
+  function renderStage() {
+    const isVideo = mode === 'video';
+    const live = isVideo && sim.state === 'live';
+    const connecting = sim.state === 'connecting';
+    // After the 40-message end there is nothing left to say: no Start / Continue until "Start over".
+    stageBtn.hidden = !isVideo || !(connecting || (!ended && (sim.state === 'idle' || sim.state === 'ended')));
+    stageBtn.disabled = connecting;
+    stageBtn.setAttribute('aria-busy', String(connecting));
+    stageLabel.textContent = t(connecting ? 'connecting' : sim.state === 'ended' ? 'continue_video' : 'start_conversation');
+    // The video stays in the layout while connecting (under the drawing) so its first frame can arrive.
+    videoEl.hidden = !isVideo;
+    stage.classList.toggle('video-on', live);
   }
 
   // ---- Transcript ----
@@ -158,7 +214,9 @@ const MOCK = {
   function nearBottom() { return lines.scrollHeight - lines.scrollTop - lines.clientHeight < 40; }
   function scrollToEnd() { lines.scrollTop = lines.scrollHeight; }
 
+  // entry.audio keeps the teacher's recorded voice for that line, so "Hear again" never asks /speak twice.
   function addLine(who, text) {
+    const entry = { text, trEl: null, cache: {}, failed: {}, pending: {}, audio: null };
     const li = document.createElement('li');
     li.className = `line ${who}`;
     const head = document.createElement('div');
@@ -167,7 +225,7 @@ const MOCK = {
     label.className = 'who';
     label.dataset.label = who === 'teacher' ? 'teacher_label' : 'you_label';
     head.appendChild(label);
-    if (who === 'teacher' && synth) {
+    if (who === 'teacher' && canSpeak()) {
       const again = document.createElement('button');
       again.type = 'button';
       again.className = 'hear-again';
@@ -175,7 +233,7 @@ const MOCK = {
       again.addEventListener('click', () => {
         stopListening(true);
         hearFirst.hidden = true;
-        speak(text);
+        speakEntry(entry);
       });
       head.appendChild(again);
     }
@@ -190,10 +248,11 @@ const MOCK = {
     li.append(head, body, tr);
     relabel(li);
     lines.insertBefore(li, interimEl);
-    const entry = { text, trEl: tr, cache: {}, failed: {}, pending: {} };
+    entry.trEl = tr;
     entries.push(entry);
     showTranslation(entry);
     scrollToEnd();
+    return entry;
   }
 
   // System notes (errors) are not spoken and not part of the chat history.
@@ -398,14 +457,157 @@ const MOCK = {
     render();
   }
 
+  // Stops whatever the teacher is saying, in every mode. Also how the student interrupts her.
   function stopSpeaking() {
     speakToken++;
     if (synth) synth.cancel();
+    stopVoiceSource();
+    if (sim.talkTimer) {
+      clearTalk();
+      if (sim.client) {
+        try { sim.client.ClearBuffer(); } catch { /* the session is already gone */ }
+      }
+    }
     setSpeaking(false);
   }
 
+  function canSpeak() { return !!synth || mode === 'voice' || mode === 'video'; }
+
+  // Says one teacher line with the best voice available right now.
   // onBlocked: called if the browser won't start speech yet (no tap on the page so far).
-  function speak(text, onBlocked) {
+  async function speakEntry(entry, onBlocked) {
+    stopSpeaking();
+    hearFirst.hidden = true;
+    if (mode !== 'voice' && mode !== 'video') { speakBrowser(entry.text, onBlocked); return; }
+    const token = speakToken;
+    if (!videoLive()) {
+      // Web Audio needs a tap on the page first. Don't pay for audio nobody can hear yet.
+      const ctx = getAudioCtx();
+      if (!ctx) { speakBrowser(entry.text, onBlocked); return; }
+      const allowed = await audioAllowed(ctx);
+      if (token !== speakToken) return;
+      if (!allowed) { showHearFirst(entry); return; }
+    }
+    if (!entry.audio) {
+      try {
+        entry.audio = await fetchSpeech(entry.text);
+      } catch {
+        if (token !== speakToken) return;
+        // The server's voice failed: the browser's voice reads this line instead.
+        voiceTrouble();
+        speakBrowser(entry.text, onBlocked);
+        return;
+      }
+      if (token !== speakToken) return;
+    }
+    if (videoLive() && sendToSimli(entry.audio)) return;
+    playPcm(entry, token);
+  }
+
+  function voiceTrouble() {
+    if (voiceNoteShown) return;
+    voiceNoteShown = true;
+    addNote(t('voice_failed'));
+  }
+
+  // The teacher's line as raw PCM16, 16 kHz, mono. Longer than /speak allows: ask in pieces and join them.
+  async function fetchSpeech(text) {
+    const parts = text.length > MAX_CHARS ? chunks(text, MAX_CHARS) : [text];
+    const buffers = [];
+    for (const part of parts) buffers.push(await fetchSpeechPart(part));
+    if (buffers.length === 1) return buffers[0];
+    const sizes = buffers.map(b => b.byteLength - (b.byteLength % 2));
+    const joined = new Uint8Array(sizes.reduce((a, b) => a + b, 0));
+    let offset = 0;
+    buffers.forEach((b, i) => { joined.set(new Uint8Array(b, 0, sizes[i]), offset); offset += sizes[i]; });
+    return joined.buffer;
+  }
+
+  async function fetchSpeechPart(text) {
+    let res;
+    try {
+      res = await fetchWithTimeout(API_BASE + '/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      }, SPEAK_TIMEOUT_MS);
+    } catch {
+      throw new Error(t('network_error'));
+    }
+    if (!res.ok) throw await serverError(res);
+    const buf = await res.arrayBuffer();
+    if (!buf || buf.byteLength < 2) throw new Error('No audio');
+    return buf;
+  }
+
+  // ---- Voice mode: play the PCM with Web Audio ----
+  let audioCtx = null;
+  let voiceSource = null;
+
+  function getAudioCtx() {
+    if (!audioCtx && AudioCtx) {
+      try { audioCtx = new AudioCtx(); } catch { audioCtx = null; }
+    }
+    return audioCtx;
+  }
+
+  async function audioAllowed(ctx) {
+    if (ctx.state === 'running') return true;
+    try {
+      await Promise.race([ctx.resume(), wait(AUDIO_UNLOCK_WAIT_MS)]);
+    } catch { /* still blocked */ }
+    return ctx.state === 'running';
+  }
+
+  // Browsers allow sound only after a tap, so wake the audio on every tap and key press.
+  function unlockAudio() {
+    if (mode !== 'voice' && mode !== 'video' && mode !== 'loading') return;
+    const ctx = getAudioCtx();
+    if (ctx && ctx.state !== 'running' && ctx.resume) ctx.resume().catch(noop);
+  }
+  ['pointerdown', 'click', 'keydown', 'touchend'].forEach(type => document.addEventListener(type, unlockAudio, true));
+
+  async function playPcm(entry, token) {
+    const ctx = getAudioCtx();
+    if (!ctx) { speakBrowser(entry.text); return; }
+    const allowed = await audioAllowed(ctx);
+    if (token !== speakToken) return;
+    if (!allowed) { showHearFirst(entry); return; }
+    const buf = entry.audio;
+    const count = Math.floor(buf.byteLength / 2);
+    const view = new DataView(buf);
+    let audioBuffer;
+    try {
+      audioBuffer = ctx.createBuffer(1, count, 16000);
+    } catch {
+      speakBrowser(entry.text);
+      return;
+    }
+    const samples = audioBuffer.getChannelData(0);
+    for (let i = 0; i < count; i++) samples[i] = view.getInt16(i * 2, true) / 32768;
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(ctx.destination);
+    source.onended = () => {
+      if (voiceSource !== source) return;
+      voiceSource = null;
+      if (token === speakToken) setSpeaking(false);
+    };
+    voiceSource = source;
+    source.start();
+    setSpeaking(true);
+  }
+
+  function stopVoiceSource() {
+    const source = voiceSource;
+    if (!source) return;
+    voiceSource = null;
+    source.onended = null;
+    try { source.stop(); } catch { /* already stopped */ }
+  }
+
+  // ---- Browser voice (speechSynthesis) ----
+  function speakBrowser(text, onBlocked) {
     if (!synth) return;
     stopSpeaking();
     if (!voice) chooseVoice();
@@ -448,12 +650,253 @@ const MOCK = {
     });
   }
 
-  function showHearFirst(text) {
+  function showHearFirst(entry) {
     hearFirst.hidden = false;
     hearFirst.onclick = () => {
       hearFirst.hidden = true;
-      speak(text);
+      speakEntry(entry);
     };
+  }
+
+  // ---- Video teacher (Simli) ----
+  // Nothing connects before the student taps Start: every minute of video costs money,
+  // and browsers need a tap before sound can play.
+  function videoLive() { return mode === 'video' && sim.state === 'live' && !!sim.client; }
+
+  async function loadMode() {
+    if (!API_BASE) return 'browser';
+    let cfg = null;
+    try {
+      const res = await fetchWithTimeout(API_BASE + '/config', { method: 'GET' }, CONFIG_TIMEOUT_MS);
+      if (res.ok) cfg = await res.json();
+    } catch { /* no answer: use the browser's own voice */ }
+    if (!cfg || cfg.voice !== true || !AudioCtx) return 'browser';
+    if (cfg.face === true && typeof window.SimliClient === 'function') return 'video';
+    return 'voice';
+  }
+
+  const modeReady = loadMode().then(m => {
+    mode = m;
+    if (m === 'video') sim.state = 'idle';
+    render();
+    return m;
+  });
+
+  async function fetchSimliToken() {
+    let res;
+    try {
+      res = await fetchWithTimeout(API_BASE + '/simli-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      }, TOKEN_TIMEOUT_MS);
+    } catch {
+      throw new Error(t('network_error'));
+    }
+    if (!res.ok) throw await serverError(res);
+    let data = null;
+    try { data = await res.json(); } catch { /* not JSON */ }
+    if (!data || typeof data.session_token !== 'string' || !data.session_token) throw new Error('No session token');
+    return data.session_token;
+  }
+
+  // Start and Continue both come here: a new token and a new session. History is kept.
+  async function startVideo() {
+    if (mode !== 'video' || (sim.state !== 'idle' && sim.state !== 'ended')) return;
+    unlockAudio(); // inside the tap, so the voice-only fallback can play too
+    const attempt = ++sim.attempt;
+    sim.state = 'connecting';
+    render();
+    let client = null;
+    try {
+      const token = await fetchSimliToken();
+      if (attempt !== sim.attempt) return;
+      const level = window.SimliLogLevel && typeof window.SimliLogLevel.ERROR === 'number' ? window.SimliLogLevel.ERROR : 2;
+      client = new window.SimliClient(token, videoEl, audioEl, null, level, 'livekit');
+      sim.client = client;
+      listenToSimli(client);
+      await withTimeout(client.start(), VIDEO_CONNECT_TIMEOUT_MS);
+      if (attempt !== sim.attempt) return;
+      goLive(client);
+    } catch {
+      if (attempt !== sim.attempt) return; // dropped on purpose (left the page)
+      sim.attempt++;
+      sim.client = null;
+      if (client) stopClient(client);
+      fallBackToVoice();
+    }
+  }
+
+  function listenToSimli(client) {
+    const mine = () => sim.client === client;
+    client.on('start', () => { if (mine()) goLive(client); });
+    client.on('speaking', () => {
+      if (!mine() || !sim.talkTimer) return;
+      sim.heardSpeaking = true;
+      setSpeaking(true);
+    });
+    client.on('silent', () => {
+      // Only after she really started, so an early "silent" doesn't end the line.
+      if (mine() && sim.talkTimer && sim.heardSpeaking) videoTalkDone();
+    });
+    // While connecting, start() reports failures itself (and Simli retries on its own).
+    const onEnd = () => { if (mine() && sim.state === 'live') endVideo(true); };
+    client.on('stop', onEnd);
+    client.on('error', onEnd);
+    client.on('startup_error', onEnd);
+  }
+
+  function goLive(client) {
+    if (sim.client !== client || sim.state !== 'connecting') return;
+    sim.state = 'live';
+    sim.startedAt = Date.now();
+    sim.lastAudioEnd = sim.startedAt;
+    clearInterval(sim.watchdog);
+    sim.watchdog = setInterval(checkVideoLimits, 2000);
+    try {
+      const p = audioEl.play();
+      if (p && p.catch) p.catch(noop);
+    } catch { /* Simli plays it when it can */ }
+    stopSpeaking(); // a voice-only line from while the video was off
+    render();
+    if (pendingEntry) {
+      const entry = pendingEntry;
+      pendingEntry = null;
+      speakEntry(entry);
+    } else if (history.length === 0 && !busy && !ended) {
+      requestReply();
+    }
+  }
+
+  // Simli ends a session after 10 minutes, or 2 minutes with no audio. End it ourselves just before,
+  // so the page shows Continue instead of a frozen face.
+  function checkVideoLimits() {
+    if (sim.state !== 'live') return;
+    const now = Date.now();
+    if (now - sim.startedAt >= VIDEO_MAX_MS - VIDEO_END_EARLY_MS ||
+        now - sim.lastAudioEnd >= VIDEO_IDLE_MS - VIDEO_END_EARLY_MS) {
+      endVideo(!ended);
+    }
+  }
+
+  // Sends one line to Simli in ~6000-byte pieces (even sizes: 2 bytes per sample). Simli plays it, lip-synced.
+  function sendToSimli(buf) {
+    const client = sim.client;
+    const total = buf.byteLength - (buf.byteLength % 2);
+    try {
+      for (let offset = 0; offset < total; offset += SIMLI_CHUNK_BYTES) {
+        client.sendAudioData(new Uint8Array(buf, offset, Math.min(SIMLI_CHUNK_BYTES, total - offset)));
+      }
+    } catch {
+      endVideo(true);
+      return false;
+    }
+    const ms = (total / PCM_BYTES_PER_SECOND) * 1000;
+    sim.lastAudioEnd = Date.now() + ms;
+    sim.heardSpeaking = false;
+    clearTimeout(sim.talkTimer);
+    // In case 'silent' never arrives.
+    sim.talkTimer = setTimeout(videoTalkDone, ms + TALK_SAFETY_MS);
+    clearTimeout(sim.finishTimer);
+    sim.finishTimer = null;
+    if (ended) {
+      // The conversation is over: stop paying once she has said goodbye.
+      sim.finishTimer = setTimeout(() => { if (ended && sim.state === 'live') endVideo(false); }, ms + TALK_SAFETY_MS + 1500);
+    }
+    setSpeaking(true);
+    return true;
+  }
+
+  function videoTalkDone() {
+    clearTalk();
+    setSpeaking(false);
+  }
+
+  function clearTalk() {
+    clearTimeout(sim.talkTimer);
+    sim.talkTimer = null;
+    sim.heardSpeaking = false;
+  }
+
+  function stopClient(client) {
+    try {
+      return Promise.resolve(client.stop()).catch(noop);
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
+  // Ends the video session so minutes stop counting. The conversation itself carries on (voice only).
+  function endVideo(showNote) {
+    const client = sim.client;
+    const wasTalking = !!sim.talkTimer;
+    sim.client = null;
+    sim.attempt++;
+    clearInterval(sim.watchdog);
+    sim.watchdog = null;
+    clearTimeout(sim.finishTimer);
+    sim.finishTimer = null;
+    clearTalk();
+    const stopped = client ? stopClient(client) : Promise.resolve();
+    if (sim.state === 'connecting' || sim.state === 'live') {
+      sim.state = 'ended';
+      if (wasTalking) setSpeaking(false);
+      if (showNote) addNote(t('video_ended'));
+      render();
+    }
+    return stopped;
+  }
+
+  // Token or start() failed: keep going with the voice alone.
+  function fallBackToVoice() {
+    mode = 'voice';
+    sim.state = 'off';
+    addNote(t('video_failed'));
+    render();
+    if (pendingEntry) {
+      const entry = pendingEntry;
+      pendingEntry = null;
+      speakEntry(entry);
+    } else if (history.length === 0 && !busy && !ended) {
+      requestReply();
+    }
+  }
+
+  stageBtn.addEventListener('click', startVideo);
+
+  // A new teacher line. In video mode the opening line waits for the student to tap Start.
+  function deliver(entry, opening) {
+    if (mode === 'video' && (sim.state === 'connecting' || (opening && sim.state !== 'live'))) {
+      pendingEntry = entry;
+      return;
+    }
+    pendingEntry = null;
+    speakEntry(entry, opening ? () => showHearFirst(entry) : null);
+  }
+
+  // ---- Server helpers ----
+  function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+  function withTimeout(promise, ms) {
+    let timer = null;
+    const timeout = new Promise((resolve, reject) => { timer = setTimeout(() => reject(new Error('timeout')), ms); });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+
+  async function fetchWithTimeout(url, options, ms) {
+    const controller = window.AbortController ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), ms) : null;
+    try {
+      return await fetch(url, controller ? Object.assign({}, options, { signal: controller.signal }) : options);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function serverError(res) {
+    let data = null;
+    try { data = await res.json(); } catch { /* not JSON */ }
+    return new Error((data && typeof data.error === 'string' && data.error) || t('network_error'));
   }
 
   // ---- Speech in ----
@@ -604,9 +1047,10 @@ const MOCK = {
       render();
       return;
     }
+    await modeReady; // which voice to use (and whether "Hear again" can work)
     busy = false;
     history.push({ role: 'assistant', content: reply });
-    addLine('teacher', reply);
+    const entry = addLine('teacher', reply);
 
     // No room for another student message: finish kindly.
     if (history.length + 1 > MAX_MESSAGES) {
@@ -614,11 +1058,12 @@ const MOCK = {
       stopListening(true);
       addLine('teacher', END_LINE);
       render();
-      speak(`${reply} ${END_LINE}`);
+      pendingEntry = null;
+      speakEntry({ text: `${reply} ${END_LINE}`, audio: null });
       return;
     }
     render();
-    speak(reply, opening ? () => showHearFirst(reply) : null);
+    deliver(entry, opening);
   }
 
   function begin() {
@@ -631,6 +1076,9 @@ const MOCK = {
     lines.textContent = '';
     interimEl = null;
     hearFirst.hidden = true;
+    pendingEntry = null;
+    clearTimeout(sim.finishTimer);
+    sim.finishTimer = null;
     requestReply();
   }
 
@@ -648,11 +1096,26 @@ const MOCK = {
     render();
   });
 
-  // Don't keep talking or listening after leaving the page.
+  // Don't keep talking or listening after leaving the page, and stop the video so minutes stop counting.
   window.addEventListener('pagehide', () => {
     if (synth) synth.cancel();
     if (rec) rec.abort();
+    stopVoiceSource();
+    endVideo(false);
   });
+  window.addEventListener('beforeunload', () => { endVideo(false); });
+  // Back from the browser's page cache: the session was stopped, so show Continue.
+  window.addEventListener('pageshow', e => { if (e.persisted) render(); });
+
+  // Go Back: stop the video first (briefly), then leave.
+  if (backLink) {
+    backLink.addEventListener('click', e => {
+      if (!sim.client || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      const href = backLink.href;
+      Promise.race([endVideo(false), wait(1000)]).then(() => { location.href = href; });
+    });
+  }
 
   updateTopicText();
   updatePicker();
